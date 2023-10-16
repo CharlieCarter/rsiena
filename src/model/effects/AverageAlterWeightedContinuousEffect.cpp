@@ -211,7 +211,11 @@ double AverageAlterWeightedContinuousEffect::calculateChangeContribution(int act
             totalWeightValue += (double) dycova;
 		}
 
-		contribution = totalAlterValue / totalWeightValue;
+		if (fabs(totalWeightValue) > EPSILON)  //  normally this will be a comparison of 0 against >= 1
+		{
+			contribution = (double) totalAlterValue * totalWeightValue;
+			// Rprintf("Contribution %f.", contribution);
+		}
 	}
 
 	return contribution;
@@ -250,7 +254,7 @@ double AverageAlterWeightedContinuousEffect::egoStatistic(int ego, double * curr
     // in current use-case
 	if (neighborCount > 0)
 	{
-		statistic *= currentValues[ego] / totalWeightValue;
+		statistic *= currentValues[ego] / neighborCount;
 	}
 
 	return statistic;
