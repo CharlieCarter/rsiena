@@ -24,6 +24,11 @@
 #include "model/EffectInfo.h"
 #include "model/EpochSimulation.h"
 
+// for unix-alike machines only
+#if !defined(WIN32) && !defined(__WIN32) && !defined(__WIN32__)
+#include <R_ext/Print.h>
+#endif
+
 namespace siena
 {
 

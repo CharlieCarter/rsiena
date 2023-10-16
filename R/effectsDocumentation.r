@@ -107,6 +107,7 @@ effectsDocumentation <- function(effects= NULL, type="html",
 				"continuousWiener",
 				"continuousIntercept",
 				"continuousOneModeObjective",
+				"dyadContinuousNetObjective", # added for continuous beh effect with dyad covar interaction
 				"unspecifiedContinuousInteraction")
 
 	mytab <- table(RSiena::allEffects[,1])

@@ -909,6 +909,49 @@ getEffects<- function(x, nintn = 10, behNintn=4, getDocumentation=FALSE, onePeri
                     objEffects <- rbind(objEffects, tmp$objEff)
                 }
             }
+            # First, constant dyadic covariates
+            message(paste('Number of dycCovars:', length(xx$dycCovars), collapse = ' '))
+            message(paste('Number of dyvCovars:', length(xx$dyvCovars), collapse = ' '))
+            for (k in seq(along = xx$dycCovars))
+            {
+              message(paste(
+                "effects.R handling constant dyadic effect", 
+                names(xx$dycCovars)[k], 
+                collapse = ' '
+                ))
+              if (attr(xx$dycCovars[[k]], "type") == "oneMode" &&
+                  attr(xx$dycCovars[[k]], 'nodeSet')[1] == nodeSet)
+              {
+                othervarname <- names(xx$dycCovars)[k]
+                message(paste('othervarname', othervarname, collapse = ' '))
+                message(paste('varnames[j]', varnames[j], collapse = ' '))
+                message(paste('names(xx$depvars)[k]', names(xx$depvars)[k], collapse = ' '))
+                tmp <- createEffects("dyadContinuousNetObjective",
+                                                varnames[j], names(xx$depvars)[k], othervarname,
+                                                name=varnames[j], groupName=groupName,
+                                                group=group, netType=netType)
+                objEffects <- rbind(objEffects, tmp)
+              }
+            }
+            # Second, varying dyadic covariates
+            for (k in seq(along = xx$dyvCovars))
+            {
+              message(paste(
+                "effects.R handling varying dyadic effect", 
+                names(xx$dycCovars)[k], 
+                collapse = ' '
+              ))
+              if (attr(xx$dyvCovars[[k]], "type") == "oneMode" &&
+                  attr(xx$dyvCovars[[k]], 'nodeSet')[1] == nodeSet)
+              {
+                othervarname <- names(xx$dyvCovars)[k]
+                tmp <- createEffects("dyadContinuousNetObjective",
+                                     varnames[j], names(xx$depvars)[k], othervarname,
+                                     name=varnames[j], groupName=groupName,
+                                     group=group, netType=netType)
+                objEffects <- rbind(objEffects, tmp)
+              }
+            }
 			interaction <- createEffects("unspecifiedContinuousInteraction",
                                      varnames[j], name=varnames[j],
 									 groupName=groupName, group=group,
