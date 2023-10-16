@@ -24,6 +24,11 @@
 #include "model/EffectInfo.h"
 #include "model/EpochSimulation.h"
 
+// for unix-alike machines only
+#if !defined(WIN32) && !defined(__WIN32) && !defined(__WIN32__)
+#include <R_ext/Print.h>
+#endif
+
 namespace siena
 {
 
@@ -50,6 +55,7 @@ void AverageInAlterWeightedContinuousEffect::initialize(const Data * pData,
 	int period,
 	Cache * pCache)
 {
+	// Rprintf("initializing average in alter weighted continuous effect");
 	NetworkDependentContinuousEffect::initialize(pData, pState, period, pCache);
 	string name1 = this->pEffectInfo()->interactionName1();
 	string name2 = this->pEffectInfo()->interactionName2();
@@ -204,9 +210,18 @@ double AverageInAlterWeightedContinuousEffect::calculateChangeContribution(int a
 			double inAlterValue = this->centeredValue(iter.actor()) * dycova;  // for simstudy: value
 			totalInAlterValue += inAlterValue;
             totalWeightValue += (double) dycova;
+
+			if (dycova >= 1)
+			{
+				// Rprintf("Ego %i. Alter %i. Dyadic Covariate value %f.", actor, j, dycova);
+			}
 		}
 
-		contribution = totalInAlterValue / totalWeightValue;
+		if (fabs(totalWeightValue) > EPSILON)  //  normally this will be a comparison of 0 against >= 1
+		{
+			contribution = (double) totalInAlterValue * totalWeightValue;
+			// Rprintf("Contribution %f.", contribution);
+		}
 	}
 
 	return contribution;
@@ -235,17 +250,20 @@ double AverageInAlterWeightedContinuousEffect::egoStatistic(int ego, double * cu
             !this->missingDyCo(j, ego))
 		{
             double dycova = this->dycoValue(j, ego);
+			if (dycova > 1)
+			{
+				// Rprintf("Ego %i. Alter %i. Dyadic Covariate value %f.", ego, j, dycova);
+			}
 			statistic += currentValues[j] * dycova;
 			neighborCount++;
             totalWeightValue += (double) dycova;
 		}
 	}
 
-    // may present issue if weight total is negative, though not anticipated
-    // in current use-case
-	if (neighborCount > 0)
+	if (neighborCount > 0)  //  normally this will be a comparison of 0 against >= 1
 	{
-		statistic *= currentValues[ego] / totalWeightValue;
+		statistic *= currentValues[ego] / neighborCount;
+		// Rprintf("Contribution %f.", statistic);
 	}
 
 	return statistic;
