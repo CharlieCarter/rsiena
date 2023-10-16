@@ -21,3 +21,4 @@ docs/
 *.Rproj
 docs/
 NEWSnew.md
+.DS_Store
