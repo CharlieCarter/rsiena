@@ -2130,7 +2130,14 @@ Effect * EffectFactory::createEffect(const EffectInfo * pEffectInfo) const
 	}
 	else if (effectName == "avInAlt")
 	{
+	if (pContinuousData)
+	{
+		pEffect = new AverageInAlterContinuousEffect(pEffectInfo);
+	}
+	else
+	{
 		pEffect = new AverageInAlterEffect(pEffectInfo, true);
+	}
 	}
 	else if (effectName == "totInAlt")
 	{
@@ -2356,11 +2363,22 @@ Effect * EffectFactory::createEffect(const EffectInfo * pEffectInfo) const
 	}
 	else if (effectName == "avAltW")
 	{
-		pEffect = new DyadicCovariateAvAltEffect(pEffectInfo,true, true, true);
+		if (pContinuousData) {
+			pEffect = new AverageAlterWeightedContinuousEffect(pEffectInfo);
+		}
+		else
+		{
+			pEffect = new DyadicCovariateAvAltEffect(pEffectInfo,true, true, true);
+		}
 	}
 	else if (effectName == "avInAltW")
 	{
-		pEffect = new DyadicCovariateAvAltEffect(pEffectInfo,true, true, false);
+		if (pContinuousData) {
+			pEffect = new AverageInAlterWeightedContinuousEffect(pEffectInfo);
+		}
+		else {
+			pEffect = new DyadicCovariateAvAltEffect(pEffectInfo,true, true, false);
+		}	
 	}
 	else if (effectName == "totAltW")
 	{
