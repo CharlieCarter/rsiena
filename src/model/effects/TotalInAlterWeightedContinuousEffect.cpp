@@ -3,14 +3,14 @@
  *
  * Web: http://www.stats.ox.ac.uk/~snijders/siena/
  *
- * File: AverageAlterContinuousEffect.cpp
+ * File: TotalInAlterWeightedContinuousEffect.cpp
  *
  * Description: This file contains the implementation of the
- * AverageAlterWeightedContinuousEffect class.
+ * TotalInAlterWeightedContinuousEffect class.
  *****************************************************************************/
 
 #include <cmath>
-#include "AverageAlterWeightedContinuousEffect.h"
+#include "TotalInAlterWeightedContinuousEffect.h"
 #include "network/Network.h"
 #include "network/IncidentTieIterator.h"
 
@@ -35,7 +35,7 @@ namespace siena
 /**
  * Constructor.
  */
-AverageAlterWeightedContinuousEffect::AverageAlterWeightedContinuousEffect(
+TotalInAlterWeightedContinuousEffect::TotalInAlterWeightedContinuousEffect(
 	const EffectInfo * pEffectInfo) :
 		NetworkDependentContinuousEffect(pEffectInfo)
 {
@@ -50,11 +50,12 @@ AverageAlterWeightedContinuousEffect::AverageAlterWeightedContinuousEffect(
  * @param[in] period the period of interest
  * @param[in] pCache the cache object to be used to speed up calculations
  */
-void AverageAlterWeightedContinuousEffect::initialize(const Data * pData,
+void TotalInAlterWeightedContinuousEffect::initialize(const Data * pData,
 	State * pState,
 	int period,
 	Cache * pCache)
 {
+	// Rprintf("initializing total in alter weighted continuous effect");
 	NetworkDependentContinuousEffect::initialize(pData, pState, period, pCache);
 	string name1 = this->pEffectInfo()->interactionName1();
 	string name2 = this->pEffectInfo()->interactionName2();
@@ -74,7 +75,7 @@ void AverageAlterWeightedContinuousEffect::initialize(const Data * pData,
 /**
  * Returns the covariate value for the given pair of actors.
  */
-double AverageAlterWeightedContinuousEffect::dycoValue(int i, int j) const
+double TotalInAlterWeightedContinuousEffect::dycoValue(int i, int j) const
 {
 	double value = 0;
 
@@ -96,7 +97,7 @@ double AverageAlterWeightedContinuousEffect::dycoValue(int i, int j) const
 /**
  * Returns if the covariate value for the given pair of actors is missing.
  */
-bool AverageAlterWeightedContinuousEffect::missingDyCo(int i, int j) const
+bool TotalInAlterWeightedContinuousEffect::missingDyCo(int i, int j) const
 {
 	bool missing = false;
 
@@ -116,7 +117,7 @@ bool AverageAlterWeightedContinuousEffect::missingDyCo(int i, int j) const
 /**
  * Returns if the associated covariate is a constant covariate or not
  */
-bool AverageAlterWeightedContinuousEffect::constantDyadicCovariate() const
+bool TotalInAlterWeightedContinuousEffect::constantDyadicCovariate() const
 {
 	if (this->lpConstantDyadicCovariate)
 	{
@@ -133,7 +134,7 @@ bool AverageAlterWeightedContinuousEffect::constantDyadicCovariate() const
  * of the covariate.
  */
 DyadicCovariateValueIterator
-	AverageAlterWeightedContinuousEffect::rowValues(int i) const
+	TotalInAlterWeightedContinuousEffect::rowValues(int i) const
 {
 	if (this->lpConstantDyadicCovariate)
 	{
@@ -152,7 +153,7 @@ DyadicCovariateValueIterator
  * of the covariate.
  */
 DyadicCovariateValueIterator
-	AverageAlterWeightedContinuousEffect::columnValues(int j) const
+	TotalInAlterWeightedContinuousEffect::columnValues(int j) const
 {
 	if (this->lpConstantDyadicCovariate)
 	{
@@ -170,7 +171,7 @@ DyadicCovariateValueIterator
  * This method is called at the start of the calculation of the
  * evaluationStatistic, endowmentStatistic, and creationStatistic
  */
-void AverageAlterWeightedContinuousEffect::initializeStatisticCalculation()
+void TotalInAlterWeightedContinuousEffect::initializeStatisticCalculation()
 {
 		this->lexcludeMissings = true;
 // Prevents having to check missingness in egoStatistic()
@@ -180,41 +181,31 @@ void AverageAlterWeightedContinuousEffect::initializeStatisticCalculation()
  * This method is called at the end of the calculation of the
  * evaluationStatistic, endowmentStatistic, and creationStatistic
  */
-void AverageAlterWeightedContinuousEffect::cleanupStatisticCalculation()
+void TotalInAlterWeightedContinuousEffect::cleanupStatisticCalculation()
 {
 		this->lexcludeMissings = false;
 }
 
 
 /**
- * Returns the average of a certain actor's alters, and thus how much
+ * Returns the total of a certain actor's alters, and thus how much
  * this effect contributes to the change in the continuous behavior.
  */
-double AverageAlterWeightedContinuousEffect::calculateChangeContribution(int actor)
+double TotalInAlterWeightedContinuousEffect::calculateChangeContribution(int actor)
 {
 	double contribution = 0;
 	const Network * pNetwork = this->pNetwork();
 
-	if (pNetwork->outDegree(actor) > 0)
+	if (pNetwork->inDegree(actor) > 0)
 	{
-
-		double totalWeightValue = 0;
-
-		for (IncidentTieIterator iter = pNetwork->outTies(actor);
+		for (IncidentTieIterator iter = pNetwork->inTies(actor);
 			iter.valid();
 			iter.next())
 		{
-            int j = iter.actor();                // identifies alter
-            double dycova = this->dycoValue(actor, j);
-			double alterValue = this->centeredValue(iter.actor());  // for simstudy: value
-			contribution += alterValue * dycova;
-            totalWeightValue += (double) dycova;
-		}
-
-		if (fabs(totalWeightValue) > EPSILON)  //  normally this will be a comparison of 0 against >= 1
-		{
-			contribution /= totalWeightValue;
-			// Rprintf("Contribution %f.", contribution);
+            int j = iter.actor(); // identifies in-alter (sends tie to focal actor, despite inversion of 'i' and 'j')
+            double dycova = this->dycoValue(j, actor);
+			double inAlterValue = this->centeredValue(iter.actor());  // for simstudy: value
+			contribution += inAlterValue * dycova;
 		}
 	}
 
@@ -226,14 +217,14 @@ double AverageAlterWeightedContinuousEffect::calculateChangeContribution(int act
  * Returns the statistic corresponding to the given ego with respect to the
  * given values of the continuous behavior variable.
  */
-double AverageAlterWeightedContinuousEffect::egoStatistic(int ego, double * currentValues)
+double TotalInAlterWeightedContinuousEffect::egoStatistic(int ego, double * currentValues)
 {
 	double statistic = 0;
 	const Network * pNetwork = this->pNetwork();
 	int neighborCount = 0;
-    double totalWeightValue = 0;
+    // double totalWeightValue = 0;
 
-	for (IncidentTieIterator iter = pNetwork->outTies(ego);
+	for (IncidentTieIterator iter = pNetwork->inTies(ego);
 		 iter.valid();
 		 iter.next())
 	{
@@ -241,20 +232,19 @@ double AverageAlterWeightedContinuousEffect::egoStatistic(int ego, double * curr
 
 		if (!this->missing(this->period(), j) &&
 			!this->missing(this->period() + 1, j) &&
-            !this->missingDyCo(ego, j))
+            !this->missingDyCo(j, ego))
 		{
-            double dycova = this->dycoValue(ego, j);
+            double dycova = this->dycoValue(j, ego);
 			statistic += currentValues[j] * dycova;
 			neighborCount++;
-            totalWeightValue += (double) dycova;
+            // totalWeightValue += (double) dycova;
 		}
 	}
 
-    // may present issue if weight total is negative, though not anticipated
-    // in current use-case
-	if (neighborCount > 0)
+	if (neighborCount > 0)  //  normally this will be a comparison of 0 against >= 1
 	{
-		statistic *= currentValues[ego] / totalWeightValue;
+		statistic *= currentValues[ego];
+		// Rprintf("Contribution %f.", statistic);
 	}
 
 	return statistic;

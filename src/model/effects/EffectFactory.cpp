@@ -2374,11 +2374,21 @@ Effect * EffectFactory::createEffect(const EffectInfo * pEffectInfo) const
 	}
 	else if (effectName == "totAltW")
 	{
-		pEffect = new DyadicCovariateAvAltEffect(pEffectInfo,false, true, true);
+		if (pContinuousData) {
+			pEffect = new TotalAlterWeightedContinuousEffect(pEffectInfo);
+		}
+		else {
+			pEffect = new DyadicCovariateAvAltEffect(pEffectInfo,false, true, true);
+		}
 	}
 	else if (effectName == "totInAltW")
 	{
-		pEffect = new DyadicCovariateAvAltEffect(pEffectInfo,false, true, false);
+		if (pContinuousData) {
+			pEffect = new TotalInAlterWeightedContinuousEffect(pEffectInfo);
+		}
+		else {
+			pEffect = new DyadicCovariateAvAltEffect(pEffectInfo,false, true, false);
+		}
 	}
 	else if (effectName == "avSimW")
 	{
