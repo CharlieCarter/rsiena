@@ -198,7 +198,7 @@ double AverageInAlterWeightedContinuousEffect::calculateChangeContribution(int a
 
 	if (pNetwork->inDegree(actor) > 0)
 	{
-		double totalInAlterValue = 0;
+		
 		double totalWeightValue = 0;
 
 		for (IncidentTieIterator iter = pNetwork->inTies(actor);
@@ -207,19 +207,14 @@ double AverageInAlterWeightedContinuousEffect::calculateChangeContribution(int a
 		{
             int j = iter.actor(); // identifies in-alter (sends tie to focal actor, despite inversion of 'i' and 'j')
             double dycova = this->dycoValue(j, actor);
-			double inAlterValue = this->centeredValue(iter.actor()) * dycova;  // for simstudy: value
-			totalInAlterValue += inAlterValue;
+			double inAlterValue = this->centeredValue(iter.actor());  // for simstudy: value
+			contribution += inAlterValue * dycova;
             totalWeightValue += (double) dycova;
-
-			if (dycova >= 1)
-			{
-				// Rprintf("Ego %i. Alter %i. Dyadic Covariate value %f.", actor, j, dycova);
-			}
 		}
 
 		if (fabs(totalWeightValue) > EPSILON)  //  normally this will be a comparison of 0 against >= 1
 		{
-			contribution = (double) totalInAlterValue * totalWeightValue;
+			contribution /= totalWeightValue;
 			// Rprintf("Contribution %f.", contribution);
 		}
 	}
@@ -250,10 +245,6 @@ double AverageInAlterWeightedContinuousEffect::egoStatistic(int ego, double * cu
             !this->missingDyCo(j, ego))
 		{
             double dycova = this->dycoValue(j, ego);
-			if (dycova > 1)
-			{
-				// Rprintf("Ego %i. Alter %i. Dyadic Covariate value %f.", ego, j, dycova);
-			}
 			statistic += currentValues[j] * dycova;
 			neighborCount++;
             totalWeightValue += (double) dycova;
@@ -262,7 +253,7 @@ double AverageInAlterWeightedContinuousEffect::egoStatistic(int ego, double * cu
 
 	if (neighborCount > 0)  //  normally this will be a comparison of 0 against >= 1
 	{
-		statistic *= currentValues[ego] / neighborCount;
+		statistic *= currentValues[ego] / totalWeightValue;
 		// Rprintf("Contribution %f.", statistic);
 	}
 

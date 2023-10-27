@@ -123,6 +123,8 @@
 #include "SimilarityTransitiveTripletsEffect.h"
 #include "ThreeCyclesEffect.h"
 #include "ThresholdShapeEffect.h"
+#include "TotalAlterWeightedContinuousEffect.h"
+#include "TotalInAlterWeightedContinuousEffect.h"
 #include "TransitiveMediatedTripletsEffect.h"
 #include "TransitiveReciprocatedTripletsEffect.h"
 #include "TransitiveReciprocatedTriplets2Effect.h"
