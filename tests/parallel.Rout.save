@@ -1,5 +1,5 @@
 
-R version 4.2.3 (2023-03-15 ucrt) -- "Shortstop Beagle"
+R version 4.3.1 (2023-06-16 ucrt) -- "Beagle Scouts"
 Copyright (C) 2023 The R Foundation for Statistical Computing
 Platform: x86_64-w64-mingw32/x64 (64-bit)
 
@@ -982,4 +982,4 @@ Total of 285 iteration steps.
 > 
 > proc.time()
    user  system elapsed 
-  20.17    0.10   22.56 
+  12.35    0.10   18.03 
