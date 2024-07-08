@@ -1,3 +1,116 @@
+# RSiena 1.4.13
+
+2024-06-06
+
+## Changes in RSiena:
+
+### Effects:
+  * New effect `homXOutAct2`.
+### Bug corrections: 
+  * Function `setEffect` corrected (it did not give the proper internal
+    parameters in the `effectName`). 
+  * Function `updateSpecification` corrected (it did not work properly
+    for including interactions).
+### Improved functionality:
+  * The handling of internal effect parameters in the columns `effectName`
+    and `functionName` of `sienaEffects` objects is improved.
+    This was achieved by changes in functions `setEffect` 
+    and `includeInteraction`.     
+    Effectnames as reproduced by `sienaFit` objects should now contain the
+    correct values of internal effect parameters.
+  * New parameter `thetaBound` for `siena07`, which has the effect of stopping
+    the estimation process if some parameters become too large (which would
+    signal divergence). 
+  * Display of deviations in `siena07gui` modified so that numbers larger 
+    than or equal to 1e5 in absolute value are displayed in exponential format
+    (and use only one line in the gui) (function `FormatString` in `siena07.r`).
+
+
+# RSiena 1.4.12
+
+2024-04-27
+
+
+## Changes in RSiena:
+
+### Improved coding:
+  * All objects created by functions, if not print or summary,
+   now have an attribute "version", which is the package version.
+### Miscellanea:
+  * New RSiena logo inst/rsienalogo-2.png
+
+
+# RSiena 1.4.11
+
+2024-04-23
+
+
+## Changes in RSiena:
+
+### Effects:
+  * Effect name `outOutDist2AvIntn` changed to `avAlt.2M.tot`.
+  * New effects `avAlt.2M.tie`, `avAlt.2M.tot`, `avAltU.2M.tie`, 
+    `dist2OutInActIntn`, `nDist2ActIntn`, `sharedToU`.
+  * Changed sqrt treatment in `outOutDist2ActIntn` and
+    `outOutDist2AvIntn` / `avAlt.2M.tot`.
+### New functionality:
+  * Method `print.sienaEffects` has an extra parameter `includeShortNames`
+    to do what the name of this parameter suggests.
+  * Improved error message for function `updateSpecification`.
+
+# RSiena 1.4.10
+
+2024-03-25
+
+
+## Changes in RSiena:
+
+### Effects:
+  * Effects `sameXV` and `sameXVInPop` added for symmetric networks, 
+    and restricted to integer-valued variables in the range from 0 to 20.
+### New functionality:
+  * Parameter `silent` (new in version 1.4.8) 
+    in `sienaAlgorithmCreate` activated. 
+### Improved coding:
+  * Actor covariates in `sienaData` have a new attribute `lowIntegers` 
+    used for in/excluding effects `sameXVInPop` and `sameXV` in
+    `getEffects`. 
+
+# RSiena 1.4.9
+
+2024-03-21
+
+
+## Changes in RSiena:
+
+### Effects:
+  * New effects `crossXOutAct`, `outOutDist2ActIntn`, 
+    `outOutDist2AvIntn`, `inPopOutW`.
+  * New effect group `doubleCovarNetObjective`.
+  * New effects `sameXV` and `sameXVInPop` for bipartite networks.
+  * `sameXCycle4` added for one-mode and symmetric networks.
+  * `sharedTo` gets default internal effect parameter `p=3`. 
+### Improved functionality:
+  * Function `updateSpecification` now also updates interaction effects
+    and `initialValues`.
+### Improved coding:
+  * Internal functions `numberIntn`, `numberBehIntn`, `checkVersion` 
+    defined in file `initializeFRAN.r`.
+  * The `Covariate` class and its descendants (all actor covariates)
+    now have functions `min` and `max`. 
+
+# RSiena 1.4.8
+
+2024-02-29
+
+
+## Changes in RSiena:
+
+### Bug corrections:
+  * Correction of memory leak in `siena07setup.ccp` for ML estimation.
+### New functionality:
+  * New parameter `silent` in `sienaAlgorithmCreate`. 
+
 # RSiena 1.4.7
 
 2024-02-20
@@ -63,6 +176,10 @@
 2024-02-14
 
 ## Changes in RSiena:
+
+### Package
+
+  * Migrated package repository to "stocnet" organisation.
 
 ### Bug corrections:
   * Put `#include <Rinternals.h>` as the last of the include commands
