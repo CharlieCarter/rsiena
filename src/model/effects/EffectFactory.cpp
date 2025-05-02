@@ -25,6 +25,7 @@
 #include "model/effects/generic/ConstantFunction.h"
 #include "model/effects/generic/InDegreeFunction.h"
 #include "model/effects/generic/IntSqrtFunction.h"
+#include "model/effects/generic/IntLogFunction.h"
 #include "model/effects/generic/DifferenceFunction.h"
 #include "model/effects/generic/AbsDiffFunction.h"
 #include "model/effects/generic/SumFunction.h"
@@ -185,6 +186,8 @@ Effect * EffectFactory::createEffect(const EffectInfo * pEffectInfo) const
 			dynamic_cast<NetworkEffect *>(pEffect1);
 		BehaviorEffect * pBehaviorEffect1 =
 			dynamic_cast<BehaviorEffect *>(pEffect1);
+        ContinuousEffect * pContinuousEffect1 =
+            dynamic_cast<ContinuousEffect *>(pEffect1);
 
 		if (pNetworkEffect1)
 		{
@@ -200,7 +203,7 @@ Effect * EffectFactory::createEffect(const EffectInfo * pEffectInfo) const
 				pNetworkEffect2,
 				pNetworkEffect3);
 		}
-		else
+		else if (pBehaviorEffect1)
 		{
 			BehaviorEffect * pBehaviorEffect2 =
 				dynamic_cast<BehaviorEffect *>(pEffect2);
@@ -215,6 +218,22 @@ Effect * EffectFactory::createEffect(const EffectInfo * pEffectInfo) const
 				pBehaviorEffect2,
 				pBehaviorEffect3);
 		}
+        else
+        {
+            ContinuousEffect * pContinuousEffect2 =
+                dynamic_cast<ContinuousEffect *>(pEffect2);
+            ContinuousEffect * pContinuousEffect3 = 0;
+            if (pEffect3)
+            {
+                pContinuousEffect3 = dynamic_cast<ContinuousEffect *>(pEffect3);
+            }
+
+            pEffect = new ContinuousInteractionEffect(pEffectInfo,
+                pContinuousEffect1,
+                pContinuousEffect2,
+                pContinuousEffect3);
+        }
+
 	}
 	else if (effectName == "density")
 	{
@@ -655,7 +674,7 @@ Effect * EffectFactory::createEffect(const EffectInfo * pEffectInfo) const
 		pEffect = new GenericNetworkEffect(pEffectInfo,
 			new DoubleCovariateCatFunction(covariateName1, covariateName2,
 				networkName, pEffectInfo->internalEffectParameter(), false, false),
-			new DoubleCovariateCatFunction(covariateName1, covariateName2, 
+			new DoubleCovariateCatFunction(covariateName1, covariateName2,
 				networkName, pEffectInfo->internalEffectParameter(), true, false));
 	}
 	else if (effectName == "sameXVInPop2")
@@ -666,7 +685,7 @@ Effect * EffectFactory::createEffect(const EffectInfo * pEffectInfo) const
 		pEffect = new GenericNetworkEffect(pEffectInfo,
 			new DoubleCovariateCatFunction(covariateName1, covariateName2,
 				networkName, pEffectInfo->internalEffectParameter(), false, true),
-			new DoubleCovariateCatFunction(covariateName1, covariateName2, 
+			new DoubleCovariateCatFunction(covariateName1, covariateName2,
 				networkName, pEffectInfo->internalEffectParameter(), true, true));
 	}
 	else if (effectName == "unequalX")
@@ -675,7 +694,11 @@ Effect * EffectFactory::createEffect(const EffectInfo * pEffectInfo) const
 	}
 	else if (effectName == "higher")
 	{
-		pEffect = new HigherCovariateEffect(pEffectInfo);
+		pEffect = new HigherCovariateEffect(pEffectInfo, false);
+	}
+	else if (effectName == "altHigherEgoX")
+	{
+		pEffect = new HigherCovariateEffect(pEffectInfo,true);
 	}
 	else if (effectName == "sameXRecip")
 	{
@@ -1030,6 +1053,12 @@ Effect * EffectFactory::createEffect(const EffectInfo * pEffectInfo) const
 		{
 			pFirstFunction = new IntSqrtFunction(pFirstFunction);
 			pSecondFunction->pFunction(sqrt);
+		}
+
+		if (pEffectInfo->internalEffectParameter() == 0)
+		{
+			pFirstFunction = new IntLogFunction(pFirstFunction);
+			pSecondFunction->pFunction(std::log);
 		}
 
 		pEffect = new GenericNetworkEffect(pEffectInfo,
@@ -1442,13 +1471,13 @@ Effect * EffectFactory::createEffect(const EffectInfo * pEffectInfo) const
 	{
 		pEffect = new GenericNetworkEffect(pEffectInfo,
 			new MixedThreePathFunction(pEffectInfo->variableName(),
-							pEffectInfo->interactionName1(),							
+							pEffectInfo->interactionName1(),
 							pEffectInfo->internalEffectParameter(), true, false, false));
 	}
 	else if (effectName == "nDist2ActIntn")
 	{
 		pEffect = new GenericNetworkEffect(pEffectInfo,
-			new IndirectTiesFunction(pEffectInfo->interactionName1(),							
+			new IndirectTiesFunction(pEffectInfo->interactionName1(),
 							pEffectInfo->internalEffectParameter(), false, true));
 	}
 	else if (effectName == "outOutDist2ActIntn")
@@ -2019,6 +2048,13 @@ Effect * EffectFactory::createEffect(const EffectInfo * pEffectInfo) const
 			pEffect = new OutdegreeContinuousEffect(pEffectInfo, true);
 		}
 	}
+    else if (effectName == "outInBalance")
+    {
+        if (pContinuousData)
+        {
+            pEffect = new OutIndegreeBalanceContinuousEffect(pEffectInfo);
+        }
+    }
 	else if (effectName == "isolate")
 	{
 		pEffect = new IsolateEffect(pEffectInfo, true);
@@ -2191,6 +2227,10 @@ Effect * EffectFactory::createEffect(const EffectInfo * pEffectInfo) const
 	{
 		pEffect = new AverageSimilarityInDist2Effect(pEffectInfo, false);
 	}
+    else if (effectName == "avSimVarAlt")
+    {
+        pEffect = new VarianceAlterSimilarityEffect(pEffectInfo, true, false, false);
+    }
 	else if (effectName == "avAlt")
 	{
 		if (pContinuousData)
@@ -2311,6 +2351,10 @@ Effect * EffectFactory::createEffect(const EffectInfo * pEffectInfo) const
 	{
 		pEffect = new AverageAlterInDist2Effect(pEffectInfo, false, true);
 	}
+    else if (effectName == "varAlt")
+    {
+        pEffect = new VarianceAlterEffect(pEffectInfo);
+    }
 	else if (effectName == "behDenseTriads")
 	{
 		pEffect = new DenseTriadsBehaviorEffect(pEffectInfo);

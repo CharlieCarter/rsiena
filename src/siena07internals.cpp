@@ -745,10 +745,14 @@ void setupBehavior(SEXP BEHAVIOR, BehaviorLongitudinalData * pBehaviorData)
 		pBehaviorData->similarityMeans(REAL(simMeans)[net],
 				CHAR(STRING_ELT(simNames, net)));
 	}
-
+    SEXP var;
+    PROTECT(var = Rf_install("variance"));
+    SEXP variance = Rf_getAttrib(VECTOR_ELT(BEHAVIOR,0), var);
+    pBehaviorData->variance(REAL(variance)[0]);
+     
 	// Now that the values are set, calculate some important statistics
 	pBehaviorData->calculateProperties();
-	UNPROTECT(5);
+	UNPROTECT(6);
 }
 
 /**
@@ -1417,7 +1421,7 @@ void setupExogenousEventGroup(SEXP EXOGEVENTGROUP, Data *pData)
 }
 
 /**
- *  Creates all the basic effects for one network
+ *  Creates all the basic effects for one dependent variable
  */
 SEXP createEffects(SEXP EFFECTS, Model *pModel, vector<Data *> * pGroupData,
 		const char *networkName, int effectCol, int parmCol, int int1Col,
@@ -1532,7 +1536,7 @@ SEXP createEffects(SEXP EFFECTS, Model *pModel, vector<Data *> * pGroupData,
 }
 
 /**
- *  Creates all the interaction effects for one network
+ *  Creates all the interaction effects for one dependent variable
  */
 SEXP createInteractionEffects(SEXP EFFECTS, Model *pModel,
 		const char *networkName, int effectCol, int initValCol,

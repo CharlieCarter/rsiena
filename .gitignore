@@ -15,11 +15,13 @@ inst/doc
 autom4te.cache
 config.log
 config.status
-docs/
+docs/*
+!docs/manual/
+docs/manual/Older/
+docs/manual/TexAux/
 *.code-workspace
 *.gz
 *.Rproj
-docs/
 NEWSnew.md
 .DS_Store
 .vscode
