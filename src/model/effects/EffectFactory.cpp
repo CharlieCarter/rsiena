@@ -80,6 +80,9 @@
 #include "model/effects/generic/IndirectTiesFunction.h"
 #include "model/tables/EgocentricConfigurationTable.h"
 #include "model/tables/NetworkCache.h"
+#include "SameCovariateContinuingEffect.h"
+#include "DifferentCovariateContinuingEffect.h"
+#include "TotalDyadicCovariateInAltersEffect.h"
 
 
 using namespace std;
@@ -2539,7 +2542,12 @@ Effect * EffectFactory::createEffect(const EffectInfo * pEffectInfo) const
 	}
 	else if (effectName == "totWInAlt")
 	{
-		pEffect = new DyadicCovariateAvAltEffect(pEffectInfo,false, false, false);
+		if (pContinuousData) {
+			pEffect = new TotalDyadicCovariateInAltersEffect(pEffectInfo);
+		}
+		else {
+			pEffect = new DyadicCovariateAvAltEffect(pEffectInfo,false, false, false);
+		}
 	}
 	else if (effectName == "avAltW")
 	{
@@ -2558,7 +2566,7 @@ Effect * EffectFactory::createEffect(const EffectInfo * pEffectInfo) const
 		}
 		else {
 			pEffect = new DyadicCovariateAvAltEffect(pEffectInfo,true, true, false);
-		}	
+		}
 	}
 	else if (effectName == "totAltW")
 	{
