@@ -80,8 +80,6 @@
 #include "model/effects/generic/IndirectTiesFunction.h"
 #include "model/tables/EgocentricConfigurationTable.h"
 #include "model/tables/NetworkCache.h"
-#include "SameCovariateContinuingEffect.h"
-#include "DifferentCovariateContinuingEffect.h"
 #include "TotalDyadicCovariateInAltersEffect.h"
 
 
