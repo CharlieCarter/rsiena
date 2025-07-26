@@ -26,8 +26,20 @@ AverageInAlterContinuousEffect::AverageInAlterContinuousEffect(
 	const EffectInfo * pEffectInfo) :
 		NetworkDependentContinuousEffect(pEffectInfo)
 {
+	this->ldivide = true;
+	// Default behavior is to divide by indegree (average)
 }
 
+/**
+ * Constructor.
+ */
+AverageInAlterContinuousEffect::AverageInAlterContinuousEffect(
+	const EffectInfo * pEffectInfo, bool divide) :
+		NetworkDependentContinuousEffect(pEffectInfo)
+{
+	this->ldivide = divide;
+	// Indicates whether there will be division by the indegree of ego
+}
 
 /**
  * Returns the average of a certain actor's alters, and thus how much
@@ -50,7 +62,11 @@ double AverageInAlterContinuousEffect::calculateChangeContribution(int actor)
 			totalInAlterValue += alterValue;
 		}
 
-		contribution = totalInAlterValue / pNetwork->inDegree(actor);
+		contribution = totalInAlterValue;
+		if (this->ldivide)
+		{
+			contribution /= pNetwork->inDegree(actor);
+		}
 	}
 
 	return contribution;
@@ -83,7 +99,14 @@ double AverageInAlterContinuousEffect::egoStatistic(int ego, double * currentVal
 
 	if (neighborCount > 0)
 	{
-		statistic *= currentValues[ego] / neighborCount;
+		if (this->ldivide)
+		{
+			statistic *= currentValues[ego] / neighborCount;
+		}
+		else
+		{
+			statistic *= currentValues[ego];
+		}
 	}
 
 	return statistic;

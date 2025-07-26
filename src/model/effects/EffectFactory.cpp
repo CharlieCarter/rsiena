@@ -2307,18 +2307,29 @@ Effect * EffectFactory::createEffect(const EffectInfo * pEffectInfo) const
 	}
 	else if (effectName == "avInAlt")
 	{
-	if (pContinuousData)
-	{
-		pEffect = new AverageInAlterContinuousEffect(pEffectInfo);
-	}
-	else
-	{
-		pEffect = new AverageInAlterEffect(pEffectInfo, true);
-	}
+		if (pContinuousData)
+		{
+			// could now also use constructor with arg2 divide=true, but this is the same as the default constructor
+			pEffect = new AverageInAlterContinuousEffect(pEffectInfo);
+		}
+		else
+		{
+			pEffect = new AverageInAlterEffect(pEffectInfo, true);
+		}
 	}
 	else if (effectName == "totInAlt")
 	{
-		pEffect = new AverageInAlterEffect(pEffectInfo, false);
+		if (pContinuousData)
+		{
+			// second arg sets divide by indegree to false, so outputs total in-alter values instead of average
+			// like the RSiena authors for discrete behaviour chose to do to reduce redundant C++ code for
+			// mathematically near-equivalent effects
+			pEffect = new AverageInAlterContinuousEffect(pEffectInfo, false);
+		}
+		else
+		{
+			pEffect = new AverageInAlterEffect(pEffectInfo, false);
+		}
 	}
 	else if (effectName == "avAltDist2")
 	{

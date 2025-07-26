@@ -655,6 +655,8 @@ dyadContinuousNetObjective,xxxxxx: tot. alter's (yyyyyy) weighted by zzzzzz,xxxx
 continuousOneModeObjective,xxxxxx average in-alter,beh. xxxxxx average in-alters,avInAlt,NA,yyyyyy,,eval,FALSE,FALSE,FALSE,FALSE,FALSE,",",0,0,objective,NA,NA,0,0,0,0,OK,FALSE
 dyadContinuousNetObjective,xxxxxx: av. in-alter's (yyyyyy) weighted by zzzzzz,xxxxxx av. in-alter's (yyyyyy) weighted by zzzzzz,avInAltW,NA,yyyyyy,zzzzzz,eval,FALSE,FALSE,FALSE,FALSE,FALSE,",",0,0,objective,NA,NA,0,0,0,0,OK,FALSE
 dyadContinuousNetObjective,xxxxxx: tot. in-alter's (yyyyyy) weighted by zzzzzz,xxxxxx tot. in-alter's (yyyyyy) weighted by zzzzzz,totInAltW,NA,yyyyyy,zzzzzz,eval,FALSE,FALSE,FALSE,FALSE,FALSE,",",0,0,objective,NA,NA,0,0,0,0,OK,FALSE
+dyadContinuousNetObjective,xxxxxx: tot in-alter's (yyyyyy) of zzzzzz,xxxxxx tot in-alters (yyyyyy) of zzzzzz,totWInAlt,NA,yyyyyy,zzzzzz,eval,FALSE,FALSE,FALSE,FALSE,FALSE,",",0,0,objective,NA,NA,0,0,0,0,OK,FALSE
+continuousOneModeObjective,xxxxxx total in-alter,xxxxxx total in-alters,totInAlt,NA,yyyyyy,,eval,FALSE,FALSE,FALSE,FALSE,FALSE,",",0,0,objective,NA,NA,0,0,0,0,OK,FALSE
 continuousOneModeObjective,xxxxxx max. alter,beh. xxxxxx max. alters,maxAlt,NA,yyyyyy,,eval,FALSE,FALSE,FALSE,FALSE,FALSE,",",0,0,objective,NA,NA,0,0,0,0,OK,FALSE
 continuousOneModeObjective,xxxxxx min. alter,beh. xxxxxx min. alters,minAlt,NA,yyyyyy,,eval,FALSE,FALSE,FALSE,FALSE,FALSE,",",0,0,objective,NA,NA,0,0,0,0,OK,FALSE
 continuousOneModeObjective,yyyyyy indegree,beh. xxxxxx indegrees,indeg,NA,yyyyyy,,eval,FALSE,FALSE,FALSE,FALSE,FALSE,",",0,0,objective,NA,NA,0,0,0,0,OK,FALSE
