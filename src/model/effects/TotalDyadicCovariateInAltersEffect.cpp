@@ -10,6 +10,7 @@
  *****************************************************************************/
 
 #include <cmath>
+#include <stdexcept>
 #include "TotalDyadicCovariateInAltersEffect.h"
 #include "network/Network.h"
 #include "network/IncidentTieIterator.h"
@@ -36,11 +37,14 @@ namespace siena
  * Constructor.
  */
 TotalDyadicCovariateInAltersEffect::TotalDyadicCovariateInAltersEffect(
-	const EffectInfo * pEffectInfo) :
-		NetworkDependentContinuousEffect(pEffectInfo)
+    const EffectInfo * pEffectInfo,
+    TransformType transformType) :
+        NetworkDependentContinuousEffect(pEffectInfo),
+        lTransformType(transformType),
+        lTransformedDycoMean(0)
 {
     this->lpConstantDyadicCovariate = 0;
-	this->lpChangingDyadicCovariate = 0;
+    this->lpChangingDyadicCovariate = 0;
 }
 
 /**
@@ -61,14 +65,65 @@ void TotalDyadicCovariateInAltersEffect::initialize(const Data * pData,
 
 	this->lpConstantDyadicCovariate = pData->pConstantDyadicCovariate(name2);
 	this->lpChangingDyadicCovariate = pData->pChangingDyadicCovariate(name2);
-	this->lpBehaviorData = pData->pBehaviorData(name1);
-	this->lexcludeMissings = false;
+	    this->lpBehaviorData = pData->pBehaviorData(name1);
+    this->lexcludeMissings = false;
 
-	if (!this->lpConstantDyadicCovariate && !this->lpChangingDyadicCovariate)
-	{
-		throw logic_error(
-			"Dyadic covariate variable '" + name2 + "' expected.");
-	}
+    if (!this->lpConstantDyadicCovariate && !this->lpChangingDyadicCovariate)
+    {
+        throw logic_error(
+            "Dyadic covariate variable '" + name2 + "' expected.");
+    }
+
+    // ------------------------------------------------------------------
+    // Compute mean of TRANSFORMED dyadic covariate values for centering
+    // ------------------------------------------------------------------
+    if (this->lTransformType == NONE)
+    {
+        this->lTransformedDycoMean = 0; // not used when NONE
+    }
+    else
+    {
+        const Network * pNet = this->pNetwork();
+        int nActors = pNet->n();
+        double sumT = 0;
+        long   count = 0;
+
+        for (int i = 0; i < nActors; ++i)
+        {
+            if (this->lpConstantDyadicCovariate)
+            {
+                DyadicCovariateValueIterator iter = this->lpConstantDyadicCovariate->rowValues(i);
+                for (; iter.valid(); iter.next())
+                {
+                    int j = iter.actor();
+                    double raw = iter.value();
+                    if (this->missingDyCo(i, j)) continue;
+                    double tval = (this->lTransformType == LOG) ? std::log1p(raw) : std::asinh(raw);
+                    sumT += tval;
+                    ++count;
+                }
+            }
+            else // changing dyadic covariate: average over ALL observations
+            {
+                int nObs = pData->observationCount();
+                for (int obs = 0; obs < nObs; ++obs)
+                {
+                    DyadicCovariateValueIterator iter = this->lpChangingDyadicCovariate->rowValues(i, obs, /*excludeMissings*/false);
+                    for (; iter.valid(); iter.next())
+                    {
+                        int j = iter.actor();
+                        double raw = iter.value();
+                        if (this->lpChangingDyadicCovariate->missing(i, j, obs)) continue;
+                        double tval = (this->lTransformType == LOG) ? std::log1p(raw) : std::asinh(raw);
+                        sumT += tval;
+                        ++count;
+                    }
+                }
+            }
+        }
+        // Compute grand mean of transformed values
+        this->lTransformedDycoMean = (count > 0) ? sumT / static_cast<double>(count) : 0;
+    }
 }
 
 /**
@@ -78,18 +133,25 @@ double TotalDyadicCovariateInAltersEffect::dycoValue(int i, int j) const
 {
 	double value = 0;
 
-	if (this->lpConstantDyadicCovariate)
-	{
-		value = this->lpConstantDyadicCovariate->value(i, j) -
-			this->lpConstantDyadicCovariate->mean();
-	}
-	else
-	{
-		value = this->lpChangingDyadicCovariate->value(i, j, this->period()) -
-			this->lpChangingDyadicCovariate->mean();
-	}
+    if (this->lpConstantDyadicCovariate)
+    {
+        value = this->lpConstantDyadicCovariate->value(i, j);
+    }
+    else
+    {
+        value = this->lpChangingDyadicCovariate->value(i, j, this->period());
+    }
 
-	return value;
+    // Perform centering only when no non-linear transformation is requested
+    if (this->lTransformType == NONE)
+    {
+        const double mean = this->lpConstantDyadicCovariate
+                              ? this->lpConstantDyadicCovariate->mean()
+                              : this->lpChangingDyadicCovariate->mean();
+        value -= mean;
+    }
+
+    return value;
 }
 
 
@@ -190,21 +252,49 @@ void TotalDyadicCovariateInAltersEffect::cleanupStatisticCalculation()
  */
 double TotalDyadicCovariateInAltersEffect::calculateChangeContribution(int actor)
 {
-	double contribution = 0;
-	const Network * pNetwork = this->pNetwork();
+        double contribution = 0;
+    const Network * pNetwork = this->pNetwork();
 
-	if (pNetwork->inDegree(actor) > 0)
-	{
-		for (IncidentTieIterator iter = pNetwork->inTies(actor);
-			iter.valid();
-			iter.next())
-		{
-            int j = iter.actor(); // identifies in-alter
-            contribution += this->dycoValue(j, actor);
-		}
-	}
+    int indeg = pNetwork->inDegree(actor);
+    if (indeg == 0)
+    {
+        return 0;
+    }
 
-	return contribution;
+    // (global transformed mean already pre-computed in initialize())
+
+
+
+    // 1. Accumulate dyadic covariate values using helper
+    for (IncidentTieIterator iter = pNetwork->inTies(actor);
+         iter.valid();
+         iter.next())
+    {
+        int j = iter.actor();
+        contribution += this->dycoValue(j, actor);
+    }
+
+    // 2. Apply the requested non-linear transformation, if any
+    if (this->lTransformType == LOG)
+    {
+        if (contribution < 0)
+        {
+            throw domain_error("TotalDyadicCovariateInAltersEffect LOG transform encountered negative value");
+        }
+        contribution = std::log1p(contribution);
+    }
+    else if (this->lTransformType == ASINH)
+    {
+        contribution = std::asinh(contribution);
+    }
+
+    // 3. Center the statistic (after transformation)
+    if (this->lTransformType != NONE)
+    {
+        contribution -= this->lTransformedDycoMean;
+    }
+
+    return contribution;
 }
 
 
@@ -214,31 +304,62 @@ double TotalDyadicCovariateInAltersEffect::calculateChangeContribution(int actor
  */
 double TotalDyadicCovariateInAltersEffect::egoStatistic(int ego, double * currentValues)
 {
-	double statistic = 0;
-	const Network * pNetwork = this->pNetwork();
-	int neighborCount = 0;
+        double statistic = 0;
+    const Network * pNetwork = this->pNetwork();
 
-	for (IncidentTieIterator iter = pNetwork->inTies(ego);
-		 iter.valid();
-		 iter.next())
-	{
-		int j = iter.actor();
+    int indeg = pNetwork->inDegree(ego);
+    if (indeg == 0)
+    {
+        return 0;
+    }
 
-		if (!this->missing(this->period(), j) &&
-			!this->missing(this->period() + 1, j) &&
-            !this->missingDyCo(j, ego))
-		{
-            statistic += this->dycoValue(j, ego);
-			neighborCount++;
-		}
-	}
 
-	if (neighborCount > 0)
-	{
-		statistic *= currentValues[ego];
-	}
 
-	return statistic;
+    // 1. Accumulate raw (un-centered) dyadic covariate values of incoming alters
+    for (IncidentTieIterator iter = pNetwork->inTies(ego);
+         iter.valid();
+         iter.next())
+    {
+        int j = iter.actor();
+
+        // When lexcludeMissings is false we must exclude missing values
+        if (!this->lexcludeMissings)
+        {
+            if (this->missing(this->period(), j) ||
+                this->missing(this->period() + 1, j) ||
+                this->missingDyCo(j, ego))
+            {
+                continue;
+            }
+        }
+
+        statistic += this->dycoValue(j, ego);
+    }
+
+    // 2. Apply transformation
+    if (this->lTransformType == LOG)
+    {
+        if (statistic < 0)
+        {
+            throw domain_error("TotalDyadicCovariateInAltersEffect LOG transform encountered negative statistic");
+        }
+        statistic = std::log1p(statistic);
+    }
+    else if (this->lTransformType == ASINH)
+    {
+        statistic = std::asinh(statistic);
+    }
+
+    // 3. Center
+    if (this->lTransformType != NONE)
+    {
+        statistic -= this->lTransformedDycoMean;
+    }
+
+    // 4. Multiply by ego's current value
+    statistic *= currentValues[ego];
+
+    return statistic;
 }
 
 }

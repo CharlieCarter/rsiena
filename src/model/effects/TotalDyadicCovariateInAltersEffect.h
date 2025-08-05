@@ -40,7 +40,11 @@ class DyadicCovariateValueIterator;
 class TotalDyadicCovariateInAltersEffect : public NetworkDependentContinuousEffect
 {
 public:
-	TotalDyadicCovariateInAltersEffect(const EffectInfo * pEffectInfo);
+    enum TransformType { NONE, LOG, ASINH };
+
+    // Constructor with optional transformation type (default NONE)
+    TotalDyadicCovariateInAltersEffect(const EffectInfo * pEffectInfo,
+                                       TransformType transformType = NONE);
 
     virtual void initialize(const Data * pData,
 		State * pState,
@@ -71,8 +75,13 @@ private:
 	BehaviorLongitudinalData * lpBehaviorData;
 
 	// flag to control exclusion of missing values
-	bool lexcludeMissings;
+	    bool lexcludeMissings;
 
+    // Selected transformation type for this effect
+    TransformType lTransformType;
+
+    // Mean of the TRANSFORMED dyadic covariate values (computed once per period)
+    double lTransformedDycoMean;
 };
 
 }

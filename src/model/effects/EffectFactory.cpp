@@ -2490,9 +2490,32 @@ Effect * EffectFactory::createEffect(const EffectInfo * pEffectInfo) const
 		pEffect = new InAltersCovariateAverageEffect(pEffectInfo,true);
 	}
 	else if (effectName == "totXInAlt")
-	{
-		pEffect = new InAltersCovariateAverageEffect(pEffectInfo,false);
-	}
+    {
+        if (pContinuousData) {
+            pEffect = new TotalDyadicCovariateInAltersEffect(pEffectInfo);
+        }
+        else {
+            pEffect = new InAltersCovariateAverageEffect(pEffectInfo,false);
+        }
+    }
+    else if (effectName == "totWInAltLog")
+    {
+        if (pContinuousData) {
+            pEffect = new TotalDyadicCovariateInAltersEffect(pEffectInfo, TotalDyadicCovariateInAltersEffect::LOG);
+        }
+        else {
+            throw std::logic_error("Effect 'totWInAltLog' is only defined for continuous behaviour variables");
+        }
+    }
+    else if (effectName == "totWInAltAsinh")
+    {
+        if (pContinuousData) {
+            pEffect = new TotalDyadicCovariateInAltersEffect(pEffectInfo, TotalDyadicCovariateInAltersEffect::ASINH);
+        }
+        else {
+            throw std::logic_error("Effect 'totWInAltAsinh' is only defined for continuous behaviour variables");
+        }
+    }
 	else if (effectName == "avXAltDist2")
 	{
 		pEffect = new AltersDist2CovariateAverageEffect(pEffectInfo,true,true);

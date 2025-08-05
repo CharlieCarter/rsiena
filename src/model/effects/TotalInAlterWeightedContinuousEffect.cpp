@@ -10,6 +10,7 @@
  *****************************************************************************/
 
  #include <cmath>
+#include <stdexcept>
  #include "TotalInAlterWeightedContinuousEffect.h"
  #include "network/Network.h"
  #include "network/IncidentTieIterator.h"

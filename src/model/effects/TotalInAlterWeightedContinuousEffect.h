@@ -11,8 +11,8 @@
 
 // modelled after DyadicCovariateAndNetworkBehaviorEffect.h and AverageAlterContinuousEffect.h
 
-#ifndef TOTALALTERWEIGHTEDCONTINUOUSEFFECT_H_
-#define TOTALALTERWEIGHTEDCONTINUOUSEFFECT_H_
+#ifndef TOTALINALTERWEIGHTEDCONTINUOUSEFFECT_H_
+#define TOTALINALTERWEIGHTEDCONTINUOUSEFFECT_H_
 
 #include "NetworkDependentContinuousEffect.h"
 
@@ -41,10 +41,14 @@ class DyadicCovariateValueIterator;
  * Total alter effect defined as the total of an ego's neighbors (with
  * respect to a certain network).
  */
-class TotalAlterWeightedContinuousEffect : public NetworkDependentContinuousEffect
+class TotalInAlterWeightedContinuousEffect : public NetworkDependentContinuousEffect
 {
 public:
-	TotalAlterWeightedContinuousEffect(const EffectInfo * pEffectInfo);
+    enum TransformType { NONE, LOG, ASINH };
+
+    // Constructor with optional transform
+    TotalInAlterWeightedContinuousEffect(const EffectInfo * pEffectInfo,
+                                         TransformType transformType = NONE);
 
     virtual void initialize(const Data * pData,
 		State * pState,
@@ -77,8 +81,10 @@ private:
 	// flag to control exclusion of missing values
 	bool lexcludeMissings;
 
+    // Selected transformation type
+    TransformType lTransformType;
 };
 
 }
 
-#endif /*TOTALALTERCONTINUOUSEFFECT_H_*/
+#endif /*TOTALINALTERWEIGHTEDCONTINUOUSEFFECT_H_*/
