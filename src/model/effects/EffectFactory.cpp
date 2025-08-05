@@ -2595,6 +2595,24 @@ Effect * EffectFactory::createEffect(const EffectInfo * pEffectInfo) const
 			pEffect = new DyadicCovariateAvAltEffect(pEffectInfo,false, true, false);
 		}
 	}
+	else if (effectName == "totInAltWLog")
+    {
+        if (pContinuousData) {
+            pEffect = new TotalInAlterWeightedContinuousEffect(pEffectInfo, TotalInAlterWeightedContinuousEffect::LOG);
+        }
+        else {
+            throw std::logic_error("Effect 'totInAltWLog' is only defined for continuous behaviour variables");
+        }
+    }
+    else if (effectName == "totInAltWAsinh")
+    {
+        if (pContinuousData) {
+            pEffect = new TotalInAlterWeightedContinuousEffect(pEffectInfo, TotalInAlterWeightedContinuousEffect::ASINH);
+        }
+        else {
+            throw std::logic_error("Effect 'totInAltWAsinh' is only defined for continuous behaviour variables");
+        }
+    }
 	else if (effectName == "avSimW")
 	{
 		pEffect = new SimilarityWEffect(pEffectInfo, true, false, false);

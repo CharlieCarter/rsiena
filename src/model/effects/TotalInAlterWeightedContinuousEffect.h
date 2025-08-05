@@ -3,16 +3,16 @@
  *
  * Web: http://www.stats.ox.ac.uk/~snijders/siena/
  *
- * File: TotalInAlterWeightedContinuousEffect.h
+ * File: TotalAlterWeightedContinuousEffect.h
  *
  * Description: This file contains the definition of the
- * TotalInAlterWeightedContinuousEffect class.
+ * TotalAlterWeightedContinuousEffect class.
  *****************************************************************************/
 
-// modelled after DyadicCovariateAndNetworkBehaviorEffect.h and TotalInAlterContinuousEffect.h
+// modelled after DyadicCovariateAndNetworkBehaviorEffect.h and AverageAlterContinuousEffect.h
 
-#ifndef TOTALINALTERWEIGHTEDCONTINUOUSEFFECT_H_
-#define TOTALINALTERWEIGHTEDCONTINUOUSEFFECT_H_
+#ifndef TOTALALTERWEIGHTEDCONTINUOUSEFFECT_H_
+#define TOTALALTERWEIGHTEDCONTINUOUSEFFECT_H_
 
 #include "NetworkDependentContinuousEffect.h"
 
@@ -41,10 +41,10 @@ class DyadicCovariateValueIterator;
  * Total alter effect defined as the total of an ego's neighbors (with
  * respect to a certain network).
  */
-class TotalInAlterWeightedContinuousEffect : public NetworkDependentContinuousEffect
+class TotalAlterWeightedContinuousEffect : public NetworkDependentContinuousEffect
 {
 public:
-	TotalInAlterWeightedContinuousEffect(const EffectInfo * pEffectInfo);
+	TotalAlterWeightedContinuousEffect(const EffectInfo * pEffectInfo);
 
     virtual void initialize(const Data * pData,
 		State * pState,
@@ -73,12 +73,12 @@ private:
 	ChangingDyadicCovariate * lpChangingDyadicCovariate;
 
 	BehaviorLongitudinalData * lpBehaviorData;
-	
-	// flag to control exclusion of missing values	
+
+	// flag to control exclusion of missing values
 	bool lexcludeMissings;
 
 };
 
 }
 
-#endif /*TOTALINALTERCONTINUOUSEFFECT_H_*/
+#endif /*TOTALALTERCONTINUOUSEFFECT_H_*/
