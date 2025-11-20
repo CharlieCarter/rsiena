@@ -1,3 +1,132 @@
+2025-10-28
+
+# RSiena 1.5.6
+
+## Changes in RSiena:
+### Coding
+  * The virtual function `preprocessEgo` now is defined properly for 
+    the function classes `NetworkAlterFunction`, 
+   `CovariateNetworkAlterFunction`, `DoubleCovariateFunction`, 
+   `SameCovariateInTiesFunction`. 
+   This was done to correct a bug that appeared for effect `sameXInPop`
+   for a two-mode network; perhaps there was a similar bug for `diffXInPop`,
+   `sameXOutAct`, `diffXOutAct`, and `sameXVInPop`. 
+### Functionality:
+  * Auxiliary function `egoAlterCombi` for GoF now omits values 
+    where the behavioral variable is `NA`.
+  * Various small additions to output of `siena07` for `verbose=TRUE` 
+    (`phase1.r` and `phase2.r`). 
+
+2025-10-17
+
+# RSiena 1.5.3
+
+### Effects
+  * New effects `quad_cc`, `avAlt_cc`, `totAlt_cc`.
+
+2025-09-06
+
+# RSiena 1.5.2
+
+## Changes in RSiena:
+### Functionality:
+  * `selectionTable` got an attribute `quad` indicating whether the plot
+    is a quadratic function.
+  * Users can now extract now extract the changeContributions when running
+    `siena07` by setting an argument `returnChangeContributions=TRUE`. 
+    If used together with `nsub=0` and `prevAns` or modified initial 
+    values in the effects object, especially useful for post-estimation,
+    e.g. in `sienaRIDynamics`.
+  * `sienaRIDynamics` uses siena07 directly now and is reinstated.
+### Effects
+  * New effects `outActMore_ego`, `outActSqrtMore_ego`, `outMore_ego`,
+    `outPopMore`, `outPopSqrtMore`, `outPopThreshold`.
+### Coding
+  * Use `(any(!gmm))` in  `initializeFRAN` to allow the use of a `prevAns` 
+    object with a different estimation method for a multigroup estimation.
+
+2025-07-12
+
+# RSiena 1.5.1
+
+## Changes in RSiena:
+### Functionality:
+  * `sienaRI` reinstated.
+  * Option `prML=2` for maximum likelihood estimation 
+    using the `move` proposal step reinstated (`sienaAlgorithmCreate`).
+### Effects
+  * New effects `divOut_ego`, `divIn_ego`. 
+### Coding
+  * Imported functions from packages `Matrix`, `lattice`, `parallel`, `MASS`, 
+    and `xtable` mentioned specifically in the `Namespace`
+    instead of importing these entire packages.
+
+
+# RSiena 1.5.0
+
+2025-07-05
+
+## New CRAN version
+
+## Changes in RSiena:
+### Maintainer
+  * Christian Steglich now is maintainer.
+
+# RSiena 1.4.25
+
+2025-07-05
+
+## Changes in RSiena:
+### Coding
+  * Undid other changes in version 1.4.23 to
+    `getTargetsChangeContributions` in `siena07setup.cpp`.
+
+# RSiena 1.4.24
+
+2025-07-04
+
+## Changes in RSiena:
+### Effects
+  * Error for creating effects in effects group `dyadSecondBipartiteObjective` 
+    was corrected in file `effects.r`, 
+    so they now are included also for changing dyadic covariates.
+    This affected effects `XWX`, `XWX1`, and `XWX2`.
+### Coding
+  * Function `Chains:printConsecutiveCancelingPairs` deleted from `model\ml`,
+    because it was not used and led to a protection error.
+  * Undid changes in version 1.4.23 to `getTargetActorStatistics` and 
+    `getTargetsChangeContributions` in `siena07setup.cpp`.
+
+# RSiena 1.4.23
+
+2025-05-03
+
+## Changes in RSiena:
+### Bug corrections
+  * Repaired (hopefully) memory leak in `getTargetActorStatistics` and 
+    `getTargetsChangeContributions` in `siena07setup.cpp`. 
+  * Repaired (hopefully) memory leak in `move` in `MLSimulation.cpp`. 
+  * Repaired memory leak  in `DoubleCovariateCatFunction`. 
+### Effects
+  * New effects `fromAny`, `sameInXCycle4`. 
+  * Effect shortName `cycle4ND` replaced by `cycle4`.
+  * Better treatment of missing covariate values in effect `sameXCycle4`. 
+  * Internal effect parameter values 3 and 4 for `sameXInPop`,`diffXInPop`,
+    `sameXInPopIntn`,  `sameXInActIntn`, `homXOutAct2`. 
+  * New C++ class `CatCovariateDependentNetworkEffect` (for `homXOutAct2`). 
+  * Added `(#)` to the `effectName` of `from`, `sameXInPop`, `diffXInPop`, 
+	`sameXVInPop`, `sameXVInPop2`.
+### New functionality
+  * In `print.sienaEffects(..., includeShortNames=TRUE)`, the `effectNumber`
+    is also printed.
+### Coding
+  * Class `Covariate` has new variable `covariateN`, which then is transferred
+    as `covarN` to `CovariateDependentNetworkEffect` and 
+    `DoubleCovariateFunction`. 
+### Changes in documentation:
+  * Definition of effects `outRateLog`, `inRateLog`, and `recipRateLog`
+    corrected in the manual.
+
 # RSiena 1.4.22
 
 2025-02-08
@@ -215,8 +344,9 @@
 
 # RSiena 1.4.7
 
-2024-02-20
+2024-02-21
 
+## New CRAN version
 
 ## Changes in RSiena:
 

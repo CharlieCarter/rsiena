@@ -1,5 +1,8 @@
 library(RSiena)
 
+# When new effects are added, the numbering of effects changes.
+# This will have consequences for the output of includeInteraction,
+# and will require adaptation of parrallel.Rout.save.
 
 ##test3
 mynet1 <- sienaDependent(array(c(tmp3, tmp4),dim=c(32, 32, 2)))
@@ -215,8 +218,8 @@ mydata <- sienaDataCreate(mynet1, mynet2)
 myeff <- getEffects(mydata)
 myeff <- includeEffects(myeff, crprod, name='mynet2', interaction1='mynet1')
 myeff <- setEffect(myeff, from, name='mynet1', interaction1='mynet2')
-(myeff <- includeGMoMStatistics(myeff, from_gmm, name='mynet2',
-                                interaction1='mynet1'))
+(myeff <- includeGMoMStatistics(myeff, from_gmm, name='mynet1',
+                                interaction1='mynet2'))
 (ans <- siena07(myalgorithm1, data=mydata, effects=myeff[myeff$type!="gmm",],
                 batch=TRUE, silent=TRUE))
 (ans1 <- siena07(myalgorithm2, data=mydata, effects=myeff,

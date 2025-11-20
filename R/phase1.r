@@ -410,7 +410,7 @@ CalculateDerivative <- function(z, x)
 					##browser()
 					z$jacobianwarn1[i] <- TRUE
 					Report(c('Warning: diagonal value', i,
-							'is non-positive.\n\n'), cf)
+							'is non-positive: ', round(dfra[i, i],8),'  \n\n'), cf)
 				}
 			}
 			if (z$n1 < 200)
@@ -669,6 +669,7 @@ makeZsmall <- function(z)
 	zsmall$nrunMH <- z$nrunMH
 	zsmall$returnDeps <- z$returnDeps
 	zsmall$returnChains <- z$returnChains
+	zsmall$returnChangeContributions <- z$returnChangeContributions
 	zsmall$returnDataFrame <- z$returnDataFrame
 	zsmall$addChainToStore <- z$addChainToStore
 	zsmall$callGrid <- z$callGrid
