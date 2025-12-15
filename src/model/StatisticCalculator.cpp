@@ -163,7 +163,7 @@ StatisticCalculator::~StatisticCalculator()
 	// this->lpStateLessMissingsEtc->deleteValues(); // now called by the State dtor
 	delete this->lpStateLessMissingsEtc;
 	this->lpStateLessMissingsEtc = 0;
-	
+
 	// this->lpPredictorState->deleteValues(); // now called by the State dtor
 	delete this->lpPredictorState;
 	this->lpPredictorState = 0;
@@ -577,14 +577,14 @@ void StatisticCalculator::calculateNetworkEvaluationStatistics(
 // Explanation Tom: lpPredictorState is the state of everything at the start of the wave.
 // pCurrentLessMissingsEtc->pNetwork(name) is the simulated state of this dependent network
 // (modified with respect to missings and structurals).
-// for only the dependent network, pNetworkData is used to overwrite 
+// for only the dependent network, pNetworkData is used to overwrite
 // The component of lpPredictorState corresponding to this dependent network.
 // the modified lpPredictorState is then used to initialize the effects.
 // For option NETCONTEMP, the entire pCurrentLessMissingsEtc is used to initialize.
 // for option NETCONTEMP, the replacement in this->lpPredictorState is supefluous
 // but I left it in to change as little as possible for enabling this option.
 	string name = pNetworkData->name();
-	const Network * pPredictorNetwork = this->lpPredictorState->pNetwork(name);	
+	const Network * pPredictorNetwork = this->lpPredictorState->pNetwork(name);
 	const Network * pCurrentLessMissingsEtc =
 		this->lpStateLessMissingsEtc->pNetwork(name);
 	this->lpPredictorState->pNetwork(name, pCurrentLessMissingsEtc);
@@ -610,7 +610,7 @@ void StatisticCalculator::calculateNetworkEvaluationStatistics(
 		if (pNetworkData->networkModelTypeContemp())
 		{
 			pEffect->initialize(this->lpData, this->lpStateLessMissingsEtc,
-				this->lperiod, &cache);			
+				this->lperiod, &cache);
 		}
 		else
 		{
@@ -631,7 +631,7 @@ void StatisticCalculator::calculateNetworkEvaluationStatistics(
 
 // I think the following is used only for sienaRI; note the "static", this is used for observations only.
 		if (this->lcountStaticChangeContributions)
-		{			
+		{
 //	Rprintf(" this->lcountStaticChangeContributions in calculateNetworkEvaluationStatistics \n");
 			int egos = pCurrentLessMissingsEtc->n();
 			int alters = pCurrentLessMissingsEtc->m();
@@ -643,7 +643,7 @@ void StatisticCalculator::calculateNetworkEvaluationStatistics(
 				if (pNetworkData->networkModelTypeContemp())
 				{
 					pEffect->initialize(this->lpData, this->lpStateLessMissingsEtc,
-						this->lperiod, &cache);			
+						this->lperiod, &cache);
 				}
 				else
 				{
@@ -1106,6 +1106,40 @@ void StatisticCalculator::calculateContinuousStatistics(
 
 		this->lstatistics[pInfo] =
 			pEffect->evaluationStatistic(currentValues);
+
+		// Actor-level statistics for continuous effects:
+		// Returned when returnActorStatistics=TRUE (via C_getTargets), analogous
+		// to network/behavior actor statistics. For continuous variables, the
+		// natural per-actor quantity is the drift contribution s_k(i) for each
+		// actor i, i.e. calculateChangeContribution(i) evaluated at the predictor
+		// state for this period.
+		if (this->lneedActorStatistics)
+		{
+			const int nActors = pContinuousData->n();
+			double * perActor = new double[nActors];
+			for (int actor = 0; actor < nActors; actor++)
+			{
+				// Match missing-value handling used for aggregate statistics:
+				// actors missing at either end of the period contribute 0.
+				if (pContinuousData->missing(this->lperiod, actor) ||
+					pContinuousData->missing(this->lperiod + 1, actor))
+				{
+					perActor[actor] = 0;
+					continue;
+				}
+
+				cache.initialize(actor);
+				// Many effects use ego-specific caching, so mirror the approach used
+				// elsewhere (e.g., static change contributions).
+				pEffect->initialize(this->lpData,
+					this->lpPredictorState,
+					this->lperiod,
+					&cache);
+				pEffect->preprocessEgo(actor);
+				perActor[actor] = pEffect->calculateChangeContribution(actor);
+			}
+			this->lactorStatistics[pInfo] = perActor;
+		}
 
 		delete pEffect;
 	}
