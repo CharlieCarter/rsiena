@@ -319,7 +319,7 @@ void updateParameters(SEXP EFFECTSLIST, SEXP THETA, vector<Data *> *
 				}
 			else
 			{
-					Rf_error("setting found for behavior variable %s", 
+					Rf_error("setting found for behavior variable %s",
 						networkName);
 				}
 			}
@@ -749,7 +749,7 @@ void setupBehavior(SEXP BEHAVIOR, BehaviorLongitudinalData * pBehaviorData)
     PROTECT(var = Rf_install("variance"));
     SEXP variance = Rf_getAttrib(VECTOR_ELT(BEHAVIOR,0), var);
     pBehaviorData->variance(REAL(variance)[0]);
-     
+
 	// Now that the values are set, calculate some important statistics
 	pBehaviorData->calculateProperties();
 	UNPROTECT(6);
@@ -1593,7 +1593,7 @@ SEXP createInteractionEffects(SEXP EFFECTS, Model *pModel,
  *  for one period. The call will relate to one group only, although all effects
  *  are the same apart from the basic rates. Not used in maximum likelihood.
  */
- 
+
 void getChangeContributionStatistics(SEXP EFFECTSLIST,
 		const StatisticCalculator * pCalculator, vector<vector<double *> > *rChangeContributions)
 {
@@ -1653,7 +1653,7 @@ void getChangeContributionStatistics(SEXP EFFECTSLIST,
     }
     UNPROTECT(1);
 }
- 
+
 /**
  *  Retrieves the statistics of individual actors for each of the effects,
  *  for one period. The call will relate to one group only, although all effects
@@ -1699,7 +1699,9 @@ void getActorStatistics(SEXP EFFECTSLIST,
 		{
 			const char * effectType = CHAR(STRING_ELT(VECTOR_ELT(EFFECTS, typeCol), i));
 			const char * netType = CHAR(STRING_ELT(VECTOR_ELT(EFFECTS, netTypeCol), i));
-			if(strcmp(netType, "oneMode") == 0 || strcmp(netType, "behavior") == 0)
+			// Include continuous dependents as well (SDE/continuous SAOM).
+			if(strcmp(netType, "oneMode") == 0 || strcmp(netType, "behavior") == 0 ||
+			   strcmp(netType, "continuous") == 0)
 			{
 				if (strcmp(effectType, "eval") == 0 || strcmp(effectType, "endow") == 0 || strcmp(effectType, "creation") == 0)
 				{
