@@ -27,12 +27,14 @@ public:
 	AverageInAlterContinuousEffect(const EffectInfo * pEffectInfo);
 	AverageInAlterContinuousEffect(const EffectInfo * pEffectInfo, bool divide);
 
+	virtual void preprocessEgo(int ego);
 	virtual double calculateChangeContribution(int actor);
 	virtual double egoStatistic(int ego, double * currentValues);
 
 private:
 	// Indicates whether there will be division by the indegree of ego
 	bool ldivide;
+	double lCachedContribution{};
 };
 
 }

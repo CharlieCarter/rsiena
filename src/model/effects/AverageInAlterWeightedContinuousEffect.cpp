@@ -188,38 +188,45 @@ void AverageInAlterWeightedContinuousEffect::cleanupStatisticCalculation()
 
 
 /**
- * Returns the average of a certain actor's alters, and thus how much
- * this effect contributes to the change in the continuous behavior.
+ * Precomputes the weighted average in-alter contribution for the given ego.
+ * Called once per ego before calculateChangeContribution().
  */
-double AverageInAlterWeightedContinuousEffect::calculateChangeContribution(int actor)
+void AverageInAlterWeightedContinuousEffect::preprocessEgo(int ego)
 {
-	double contribution = 0;
+	ContinuousEffect::preprocessEgo(ego);
+	this->lCachedContribution = 0;
 	const Network * pNetwork = this->pNetwork();
 
-	if (pNetwork->inDegree(actor) > 0)
+	if (pNetwork->inDegree(ego) > 0)
 	{
-		
 		double totalWeightValue = 0;
+		double weightedSum = 0;
 
-		for (IncidentTieIterator iter = pNetwork->inTies(actor);
+		for (IncidentTieIterator iter = pNetwork->inTies(ego);
 			iter.valid();
 			iter.next())
 		{
-            int j = iter.actor(); // identifies in-alter (sends tie to focal actor, despite inversion of 'i' and 'j')
-            double dycova = this->dycoValue(j, actor);
-			double inAlterValue = this->centeredValue(iter.actor());  // for simstudy: value
-			contribution += inAlterValue * dycova;
+            int j = iter.actor(); // identifies in-alter
+            double dycova = this->dycoValue(j, ego);
+			double inAlterValue = this->centeredValue(iter.actor());
+			weightedSum += inAlterValue * dycova;
             totalWeightValue += (double) dycova;
 		}
 
-		if (fabs(totalWeightValue) > EPSILON)  //  normally this will be a comparison of 0 against >= 1
+		if (fabs(totalWeightValue) > EPSILON)
 		{
-			contribution /= totalWeightValue;
-			// Rprintf("Contribution %f.", contribution);
+			this->lCachedContribution = weightedSum / totalWeightValue;
 		}
 	}
+}
 
-	return contribution;
+
+/**
+ * Returns the precomputed weighted average in-alter contribution (O(1)).
+ */
+double AverageInAlterWeightedContinuousEffect::calculateChangeContribution(int actor)
+{
+	return this->lCachedContribution;
 }
 
 

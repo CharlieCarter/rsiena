@@ -187,28 +187,36 @@ void TotalAlterWeightedContinuousEffect::cleanupStatisticCalculation()
 
 
 /**
- * Returns the total beh val of a certain actor's alters, and thus how much
- * this effect contributes to the change in the continuous behavior.
+ * Precomputes the weighted total alter contribution for the given ego.
+ * Called once per ego before calculateChangeContribution().
  */
-double TotalAlterWeightedContinuousEffect::calculateChangeContribution(int actor)
+void TotalAlterWeightedContinuousEffect::preprocessEgo(int ego)
 {
-	double contribution = 0;
+	ContinuousEffect::preprocessEgo(ego);
+	this->lCachedContribution = 0;
 	const Network * pNetwork = this->pNetwork();
 
-	if (pNetwork->outDegree(actor) > 0)
+	if (pNetwork->outDegree(ego) > 0)
 	{
-		for (IncidentTieIterator iter = pNetwork->outTies(actor);
+		for (IncidentTieIterator iter = pNetwork->outTies(ego);
 			iter.valid();
 			iter.next())
 		{
-            int j = iter.actor();                // identifies alter
-            double dycova = this->dycoValue(actor, j);
-			double alterValue = this->centeredValue(iter.actor());  // for simstudy: value
-			contribution += alterValue * dycova;
+            int j = iter.actor();
+            double dycova = this->dycoValue(ego, j);
+			double alterValue = this->centeredValue(iter.actor());
+			this->lCachedContribution += alterValue * dycova;
 		}
 	}
+}
 
-	return contribution;
+
+/**
+ * Returns the precomputed weighted total alter contribution (O(1)).
+ */
+double TotalAlterWeightedContinuousEffect::calculateChangeContribution(int actor)
+{
+	return this->lCachedContribution;
 }
 
 

@@ -188,13 +188,15 @@ void ContinuousVariable::calculateEffectContribution()
 {
 	const Function * pFunction = this->pFunction();
 
-	for (unsigned i = 0; i < pFunction->rEffects().size(); i++)
+	// Loop actors-first so that each effect's preprocessEgo() cache
+	// is valid when calculateChangeContribution() reads it (O(1)).
+	for (int actor = 0; actor < this->n(); actor++)
 	{
-		ContinuousEffect * pEffect =
-			(ContinuousEffect *) pFunction->rEffects()[i];
-
-		for (int actor = 0; actor < this->n(); actor++)
+		for (unsigned i = 0; i < pFunction->rEffects().size(); i++)
 		{
+			ContinuousEffect * pEffect =
+				(ContinuousEffect *) pFunction->rEffects()[i];
+			pEffect->preprocessEgo(actor);
 			this->leffectContribution[actor][i] =
 				pEffect->calculateChangeContribution(actor);
 		}

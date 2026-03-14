@@ -187,38 +187,45 @@ void AverageAlterWeightedContinuousEffect::cleanupStatisticCalculation()
 
 
 /**
- * Returns the average of a certain actor's alters, and thus how much
- * this effect contributes to the change in the continuous behavior.
+ * Precomputes the weighted average alter contribution for the given ego.
+ * Called once per ego before calculateChangeContribution().
  */
-double AverageAlterWeightedContinuousEffect::calculateChangeContribution(int actor)
+void AverageAlterWeightedContinuousEffect::preprocessEgo(int ego)
 {
-	double contribution = 0;
+	ContinuousEffect::preprocessEgo(ego);
+	this->lCachedContribution = 0;
 	const Network * pNetwork = this->pNetwork();
 
-	if (pNetwork->outDegree(actor) > 0)
+	if (pNetwork->outDegree(ego) > 0)
 	{
-
 		double totalWeightValue = 0;
+		double weightedSum = 0;
 
-		for (IncidentTieIterator iter = pNetwork->outTies(actor);
+		for (IncidentTieIterator iter = pNetwork->outTies(ego);
 			iter.valid();
 			iter.next())
 		{
-            int j = iter.actor();                // identifies alter
-            double dycova = this->dycoValue(actor, j);
-			double alterValue = this->centeredValue(iter.actor());  // for simstudy: value
-			contribution += alterValue * dycova;
+            int j = iter.actor();
+            double dycova = this->dycoValue(ego, j);
+			double alterValue = this->centeredValue(iter.actor());
+			weightedSum += alterValue * dycova;
             totalWeightValue += (double) dycova;
 		}
 
-		if (fabs(totalWeightValue) > EPSILON)  //  normally this will be a comparison of 0 against >= 1
+		if (fabs(totalWeightValue) > EPSILON)
 		{
-			contribution /= totalWeightValue;
-			// Rprintf("Contribution %f.", contribution);
+			this->lCachedContribution = weightedSum / totalWeightValue;
 		}
 	}
+}
 
-	return contribution;
+
+/**
+ * Returns the precomputed weighted average alter contribution (O(1)).
+ */
+double AverageAlterWeightedContinuousEffect::calculateChangeContribution(int actor)
+{
+	return this->lCachedContribution;
 }
 
 
