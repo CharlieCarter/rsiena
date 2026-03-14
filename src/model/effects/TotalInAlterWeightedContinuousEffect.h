@@ -55,6 +55,7 @@ public:
 		int period,
 		Cache * pCache);
 
+	virtual void preprocessEgo(int ego);
 	virtual double calculateChangeContribution(int actor);
 	virtual double egoStatistic(int ego, double * currentValues);
 
@@ -83,6 +84,9 @@ private:
 
     // Selected transformation type
     TransformType lTransformType;
+
+	// Cached contribution from preprocessEgo()
+	double lCachedContribution{};
 };
 
 }

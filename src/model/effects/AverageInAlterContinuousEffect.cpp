@@ -42,34 +42,40 @@ AverageInAlterContinuousEffect::AverageInAlterContinuousEffect(
 }
 
 /**
- * Returns the average of a certain actor's alters, and thus how much
- * this effect contributes to the change in the continuous behavior.
+ * Precomputes the in-alter contribution for the given ego.
+ * Called once per ego before calculateChangeContribution().
  */
-double AverageInAlterContinuousEffect::calculateChangeContribution(int actor)
+void AverageInAlterContinuousEffect::preprocessEgo(int ego)
 {
-	double contribution = 0;
+	ContinuousEffect::preprocessEgo(ego);
+	this->lCachedContribution = 0;
 	const Network * pNetwork = this->pNetwork();
 
-	if (pNetwork->inDegree(actor) > 0)
+	if (pNetwork->inDegree(ego) > 0)
 	{
 		double totalInAlterValue = 0;
 
-		for (IncidentTieIterator iter = pNetwork->inTies(actor);
+		for (IncidentTieIterator iter = pNetwork->inTies(ego);
 			iter.valid();
 			iter.next())
 		{
-			double alterValue = this->centeredValue(iter.actor());  // for simstudy: value
-			totalInAlterValue += alterValue;
+			totalInAlterValue += this->centeredValue(iter.actor());
 		}
 
-		contribution = totalInAlterValue;
+		this->lCachedContribution = totalInAlterValue;
 		if (this->ldivide)
 		{
-			contribution /= pNetwork->inDegree(actor);
+			this->lCachedContribution /= pNetwork->inDegree(ego);
 		}
 	}
+}
 
-	return contribution;
+/**
+ * Returns the precomputed in-alter contribution (O(1)).
+ */
+double AverageInAlterContinuousEffect::calculateChangeContribution(int actor)
+{
+	return this->lCachedContribution;
 }
 
 

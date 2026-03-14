@@ -191,46 +191,55 @@
 
 
  /**
-  * Returns the total of a certain actor's alters, and thus how much
-  * this effect contributes to the change in the continuous behavior.
+  * Precomputes the weighted total in-alter contribution for the given ego.
+  * The LOG/ASINH transform is applied after summation, matching original semantics.
+  * Called once per ego before calculateChangeContribution().
   */
- double TotalInAlterWeightedContinuousEffect::calculateChangeContribution(int actor)
+ void TotalInAlterWeightedContinuousEffect::preprocessEgo(int ego)
  {
-	 double contribution = 0;
-	 const Network * pNetwork = this->pNetwork();
+	ContinuousEffect::preprocessEgo(ego);
+	this->lCachedContribution = 0;
+	const Network * pNetwork = this->pNetwork();
 
-	 if (pNetwork->inDegree(actor) > 0)
-	 {
-		 for (IncidentTieIterator iter = pNetwork->inTies(actor);
+	if (pNetwork->inDegree(ego) > 0)
+	{
+		 for (IncidentTieIterator iter = pNetwork->inTies(ego);
 			 iter.valid();
 			 iter.next())
 		 {
-			 int j = iter.actor(); // identifies in-alter (sends tie to focal actor, despite inversion of 'i' and 'j')
-			 double dycova = this->dycoValue(j, actor);
-			 double inAlterValue = this->centeredValue(iter.actor());  // for simstudy: value
-			 contribution += inAlterValue * dycova;
+			 int j = iter.actor();
+			 double dycova = this->dycoValue(j, ego);
+			 double inAlterValue = this->centeredValue(iter.actor());
+			 this->lCachedContribution += inAlterValue * dycova;
 		 }
-		 }
+	}
 
-	 // Apply transformation if requested
-	 switch (this->lTransformType)
-	 {
+	// Apply transformation if requested
+	switch (this->lTransformType)
+	{
 		 case LOG:
-			 if (contribution < 0)
+			 if (this->lCachedContribution < 0)
 			 {
 				 throw domain_error("TotalInAlterWeightedContinuousEffect LOG transform encountered negative value");
 			 }
-			 contribution = std::log1p(contribution);
+			 this->lCachedContribution = std::log1p(this->lCachedContribution);
 			 break;
 		 case ASINH:
-			 contribution = std::asinh(contribution);
+			 this->lCachedContribution = std::asinh(this->lCachedContribution);
 			 break;
 		 case NONE:
 		 default:
 			 break;
-	 }
+	}
+ }
 
-	 return contribution;
+
+ /**
+  * Returns the precomputed weighted total in-alter contribution (O(1)).
+  */
+ double TotalInAlterWeightedContinuousEffect::calculateChangeContribution(int actor)
+ {
+	return this->lCachedContribution;
  }
 
 
