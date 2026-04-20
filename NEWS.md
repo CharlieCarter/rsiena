@@ -1,3 +1,13 @@
+2026-04-20
+
+# RSiena 1.6.6
+
+## Changes in RSiena:
+### Sanity checks 
+  * Stack handling of `getChangeContributionsList' improved in
+  `siena07utilities.cpp', for compliance with CRAN.
+
+
 2026-04-08
 
 # RSiena 1.6.5
