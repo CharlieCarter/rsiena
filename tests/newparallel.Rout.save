@@ -1,6 +1,6 @@
 
-R version 4.5.1 (2025-06-13 ucrt) -- "Great Square Root"
-Copyright (C) 2025 The R Foundation for Statistical Computing
+R version 4.6.0 (2026-04-24 ucrt) -- "Because it was There"
+Copyright (C) 2026 The R Foundation for Statistical Computing
 Platform: x86_64-w64-mingw32/x64
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -294,7 +294,7 @@ Total of 595 iteration steps.
 > test_parameter(ans, method='same', tested=3, tested2=4)
 Tested effects:
  reciprocity endow  ==  reciprocity creation 
-chi-squared = 1.79, d.f. = 1; standard error of linear combination = 1.13; one-sided Z = 1.34; two-sided p = 0.181. 
+chi-squared = 1.79, d.f. = 1; standard error = 1.13; one-sided Z = 1.34; two-sided p = 0.181. 
 > ##test7
 > mynet1 <- as_dependent_rsiena(array(c(tmp3,tmp4),dim=c(32,32,2)))
 > mydata <- make_data_rsiena(mynet1)
@@ -1730,4 +1730,4 @@ Total of 605 iteration steps.
 > 
 > proc.time()
    user  system elapsed 
-  52.96    1.12   54.31 
+  42.39    0.81   43.34 
