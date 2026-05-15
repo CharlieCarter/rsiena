@@ -76,10 +76,15 @@ createEffects <- function(effectGroup, xName=NULL, yName=NULL, zName = NULL,
 DoubleAttributesChecked <- function(cova1, cova2)
 {
 	if (is.null(attr(cova1,"lowIntegers")) | is.null(attr(cova2,"lowIntegers")))
-	{
-		stop("Please use function sienaDataCreate for RSiena version at least 1.4.10")
+	{	
+		(lowIntegers(cova1, attr(cova1, "centered")) && 
+						lowIntegers(cova2, attr(cova1, "centered")))
+#		stop("Please use function sienaDataCreate for RSiena version at least 1.4.10")
 	}
-	(attr(cova1,"lowIntegers") && attr(cova2,"lowIntegers"))
+	else
+	{
+		(attr(cova1,"lowIntegers") && attr(cova2,"lowIntegers"))
+	}
 }
 
 ##@getEffects DataCreate create effects object
