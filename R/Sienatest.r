@@ -42,7 +42,16 @@ test_parameter.sienaFit <- function(x, method=NULL,
 		{
 			tested <- x$test
 		}
-		score.Test(x, tested=tested)
+		if (hasArg("onestep"))
+		{
+			args <- list(...)
+			onest <- args$onestep
+		}
+		else
+		{
+			onest <- FALSE
+		}		
+		score.Test(x, tested=tested, onestep=onest)
 	}
 	else if (method=="same")
 	{
@@ -209,6 +218,7 @@ ScoreTest<- function(pp, dfra, msf, fra, test, redundant, maxlike)
 	{
 		oneStep<- -dinv2 %*% fra
 	}
+# All the following are added to z in terminateFRAN
 	list(testresult=testresult, testresulto=testresulto,
 		testresOverall=testresOverall, covMatrix=covMatrix,
 		oneStep=oneStep, dinv2= dinv2, dfra2=dfra2)
@@ -306,11 +316,12 @@ theEfNames <- function(ans){
 	res
 }
 
-##@scoreTest Calculate score tested
-score.Test <- function(x, tested=x$test)
+##@score.Test Calculate score tested
+score.Test <- function(x, tested=x$test, onestep=FALSE)
 	# use: x must be a sienaFit object;
 	# tested must be a boolean vector with length equal to the number of parameters of x,
-	# or a vector of integer numbers between 1 and x$pp.
+	# or a vector of integer numbers between 1 and x$pp;
+	# a boolean vector with all TRUE
 {
 	if ((is.numeric(tested)) || (is.integer(tested)))
 	{
@@ -319,17 +330,31 @@ score.Test <- function(x, tested=x$test)
 			stop(paste('The maximum requested coordinate is too high:',
 					max(tested)))
 		}
-		tested <- (1:x$pp) %in% tested
+		btested <- (1:x$pp) %in% tested
 	}
-	if (sum(tested) <= 0) stop(paste('Something should be tested, but the total requested is',
-			sum(tested)))
-	if (length(tested) != x$pp) stop('Dimensions of tested must agree')
-	if (any(tested & (!x$fix))) warning('Warning: some tested parameters were not fixed; do you know what you are doing??? \n')
+	else # it should be logical
+	{
+		if (all(tested))
+		{
+			tested <- x$test
+		}
+		else if (length(tested) != x$pp)
+		{
+			stop(paste('The length of the boolean vector is ', length(tested),
+				', but it should be ', x$pp, '.', sep=''))		
+		}
+		btested <- tested
+		tested <- which(btested)
+	}
+	if (sum(btested) <= 0) stop(paste('Something should be tested, but the total requested is',
+			sum(btested)))
+	if (length(btested) != x$pp) stop('Length of boolean vector tested should be', x$pp)	
+	if (any(btested & (!x$fix))) warning('Warning: some tested parameters were not fixed; do you know what you are doing??? \n')
 	fra <- colMeans(x$sf, na.rm=TRUE)
-	redundant <- (x$fix & (!tested))
-	tests <- EvaluateTestStatistic(x$maxlike, tested, redundant, x$dfra, x$msf, fra)
+	redundant <- (x$fix & (!btested))
+	tests <- EvaluateTestStatistic(x$maxlike, btested, redundant, x$dfra, x$msf, fra)
 	teststat <- tests$cvalue
-	df <- sum(tested)
+	df <- sum(btested)
 	if (df == 1)
 	{
 		onesided <- tests$oneSided
@@ -339,8 +364,18 @@ score.Test <- function(x, tested=x$test)
 		onesided <- NULL
 	}
 	pval <- 1 - pchisq(teststat, df)
-	efnames <- theEfNames(x)[tested]
-	t_x <- list(chisquare=teststat, df=df, pvalue=pval, onesided=onesided, efnames=efnames)
+	efnames <- theEfNames(x)[btested]
+	if (onestep)
+	{
+		onestepests <- x$oneStep + x$theta
+	}
+	else
+	{
+		onestepests <- NULL
+	}
+	t_x <- list(chisquare=teststat, df=df, pvalue=pval, onesided=onesided, 
+					efnames=efnames, theEfNames=theEfNames(x),
+					onestepests=onestepests)
 	class(t_x) <- "sienaTest"
 	attr(t_x, "version") <- packageDescription(pkgname, fields = "Version")
 	t_x
@@ -388,6 +423,10 @@ Wald.RSiena <- function(A, x)
 Multipar.RSiena <- function(x, tested)
 {
 	p <- length(x$theta)
+	if (any(x$requestedEffects[tested,"fix"]))
+	{
+		stop("Some parameters to be tested are fixed")
+	}
 	efnames <- theEfNames(x)[tested]
 	k <- length(tested)
 	A <- matrix(0, nrow=k, ncol=p)
@@ -430,7 +469,7 @@ testSame.RSiena <- function(x, e1, e2){
 }
 
 ##@print.sienaTest Methods
-print.sienaTest <- function(x, ...)
+print.sienaTest <- function(x,  ...)
 {
 	if (!inherits(x, "sienaTest"))
 	{
@@ -450,7 +489,7 @@ print.sienaTest <- function(x, ...)
 		', d.f. = ', x$df, '; ', sep=''))
 	if ((x$df == 1) & (!is.null(x$onesided)) & (!is.null(x$sterror)))
 	{
-		cat(paste( 'standard error of linear combination = ',
+		cat(paste( 'standard error = ',
 			format(round(x$sterror, digits=3), nsmall = 2), '; ', sep=''))
 		cat(paste('one-sided Z = ',
 			format(round(x$onesided, digits=2), nsmall = 2), '; ', sep=''))
@@ -464,6 +503,21 @@ print.sienaTest <- function(x, ...)
 	{
 		cat(paste(' p = ',
 			format(round(x$pvalue, digits=3), nsmall = 2), '. \n', sep=''))
+	}
+	if (!is.null(x$onestepests)) 
+	{
+	# this implies it comes from score.Test
+		cat('One-step estimates:\n')
+		maxname <- max(nchar(x$efnames))		
+	# pad names with trailing 0s, if necessary:
+		pad <- Vectorize(function(t){
+			while(nchar(t) < maxname){
+				t <- paste(t, " ", sep="")
+			}
+			return(t)})
+		padded <- pad(x$theEfNames)
+		onestepest <- x$onestepests
+		cat(paste(padded, sprintf("%7.3f", onestepest), '\n'), sep="")
 	}
 	invisible(x)
 }

@@ -122,7 +122,7 @@ initializeFRAN <- function(z, x, data, effects, prevAns=NULL, initC,
 	}
 	if (!initC) ## i.e. first time round
 	{
-		if ((!inherits(data,"siena")) && (!inherits(data, 'sienadata')))
+		if ((!inherits(data,"siena")) && (!inherits(data, "sienadata")))
 		{
 			stop("not valid siena data object")
 		}
@@ -2135,11 +2135,31 @@ updateTheta <- function(effects, prevAns, varName=NULL)
 update_theta  <- function(x, ...) UseMethod("update_theta", x)
 
 ##@updateTheta.sienaEffects Copy theta values from previous fit
-update_theta.sienaEffects <- function(x, prevAns, varName=NULL, ...){
-	updateTheta(x, prevAns=prevAns, varName=varName)
+update_theta.sienaEffects <- function(x, prevAns, varName=NULL, onestep=FALSE, freed=0, r=1, ...){
+	eff <- updateTheta(x, prevAns=prevAns, varName=varName)
+	if (onestep)
+	{
+		if (is.null(prevAns$oneStep))
+		{
+			stop("prevAns does not contain any fixed-and-tested effects. Do not use onestep.")
+		}
+		effsF <- prevAns$requestedEffects 
+		requested <- which(names(prevAns$requestedEffects)=="requested")
+		if (min(freed) > 0)
+		{
+			effsF$test[freed] <- FALSE
+			effsF$fix[freed] <- FALSE
+		}
+		effsF$initialValue <- prevAns$theta + r*prevAns$oneStep
+# If this leads to an error, perhaps
+#	effsF$initialValue[!effsF$basicRate[effsF$include]]  <- prevAns$theta + r*prevAns$oneStep
+		eff[eff$effectNumber %in% effsF$effectNumber,] <- subset(effsF ,select = -requested)
+	}
+	eff	
 }
 
-##@ numberIntn siena07 sienaBayes, number of network interaction effects used for getEffects
+
+##@ numberIntn siena07 multi_siena, number of network interaction effects used for getEffects
 numberIntn <- function(myeff){
 	if (!is.null(myeff)){	
 		numnet <- length(unique(myeff$name[myeff$shortName=="density"])) # number of dependent networks
@@ -2152,7 +2172,7 @@ numberIntn <- function(myeff){
 	ifelse((numnet <= 0), 10, nintn/numnet) # 10 is the default in getEffects
 }
 
-##@ numberIntn siena07 sienaBayes, number of behavior interaction effects used for getEffects
+##@ numberIntn siena07 multi_siena, number of behavior interaction effects used for getEffects
 numberBehIntn <- function(myeff){
 	if (!is.null(myeff)){
 		numbeh <- length(unique(myeff$name[myeff$shortName=="linear"])) # number of discrete behaviors
