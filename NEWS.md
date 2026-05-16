@@ -1,3 +1,17 @@
+2026-05-15
+
+# RSiena 1.6.7
+
+## Changes in RSiena:
+### Functionality
+  * Option `onestep` for `test_parameter(..., method="score", ...)`.
+  * Option `onestep` for `update_theta`.
+  * Name `sienaNet` added to `transformScript` as one of the names
+    to be replaced.
+  * Small comment changes in `initializeFRAN.r` and `maxlikec.r`.
+  * `make_effects` also works for `sienadata` objects older than 1.4.10
+    (due to small change in `effects.r`).
+
 2026-04-20
 
 # RSiena 1.6.6

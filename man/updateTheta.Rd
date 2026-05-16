@@ -10,7 +10,7 @@ A function to update the initial values of the parameters, and a function
 to update an effects object.
 }
 \description{
-  \code{update_theta} copies the final values of 
+  \code{update_theta} copies the final values of
   the parameter estimates for any matching selected effects
   from a \code{\link{sienaFit}} object to a Siena effects object.\cr
   \code{update_specification} includes in a Siena effects object
@@ -23,7 +23,8 @@ to update an effects object.
   the others are kept for backward compatibility.
 }
 \usage{
-\method{update_theta}{sienaEffects}(x, prevAns, varName=NULL, ...)
+\method{update_theta}{sienaEffects}(x, prevAns, varName=NULL,
+                                    onestep=FALSE, freed=0, r=1, ...)
 \method{update_specification}{sienaEffects}(x, effects.from,
          effects.extra=NULL, name.to=NULL, name.from=NULL, ...)
 
@@ -45,6 +46,14 @@ updateSpecification(effects.to, effects.from,
   \item{name.from}{Character string, name of dependent variable in
        \code{object.from}.}
   \item{effects}{Object of class \code{\link{sienaEffects}}.}
+  \item{onestep}{Boolean: whether to change the initial value to the
+       one-step estimate in \code{prevAns}. Only possible if there are
+       some fixed-and-tested effects in \code{prevAns}.}
+  \item{freed}{Integer or integer vector indicating the numbers of effects
+      (as numbered in \code{prevAns}) to be freed, i.e., for which
+      \code{test} and \code{fix} are to be set to \code{FALSE}.
+      If 0, none will be freed.}
+  \item{r}{Real number, preferably in \code{(0.1]}.}
   \item{...}{Additional arguments, not used now.}
 }
 \details{
@@ -56,7 +65,9 @@ updateSpecification(effects.to, effects.from,
   the dependent variable on which the run was conditioned are added to
   the final value of theta. If \code{varName} is not \code{NULL},
   this update is restricted to effects for the dependent variable/s
-  specified by \code{varName}.
+  specified by \code{varName}.\cr
+  If \code{onestep=TRUE}, then \code{prevAns} should have been obtained
+  using effects object \code{x}.
   \cr
   By \code{update_specification}, the effects included in \code{effects.from}
   are also included in \code{x} (for \code{update_specification}) \code{effects.to}
@@ -92,16 +103,19 @@ mynet1 <- as_dependent_rsiena(array(c(tmp3, tmp4), dim=c(32, 32, 2)))
 mydata <- make_data_rsiena(mynet1)
 myeff1 <- make_specification(mydata)
 myeff1 <- set_effect(myeff1, transTrip)
-myeff1 <- set_interaction(myeff1, list(recip, inPop))
+myeff1 <- set_effect(myeff1, inPop)
+myeff1 <- set_effect(myeff1, outAct, test=TRUE, fix=TRUE)
 myalgo <- set_algorithm_saom(nsub=1, n3=100, seed=1291)
 (ans <- siena(mydata, effects=myeff1, control_algo=myalgo,
                                           batch=TRUE))
 ans$theta
 (myeff <- update_theta(myeff1, ans))
-##
+(myeff2 <- update_theta(myeff1, ans, onestep=TRUE, freed=5, r=1))
+(ans2 <- siena(mydata, effects=myeff2, control_algo=myalgo,
+                                          batch=TRUE))
 ## For updateSpecification:
-myeff2 <- make_specification(mydata)
-myeff2 <- set_effect(myeff2, outAct)
-update_specification(myeff2, myeff1)
+myeff3 <- make_specification(mydata)
+myeff3 <- set_effect(myeff3, outAct)
+update_specification(myeff3, myeff1)
 }
 \keyword{models}
