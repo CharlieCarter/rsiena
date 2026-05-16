@@ -15,9 +15,6 @@
 
 test_gof <- function(object, ...) UseMethod("test_gof", object)
 
-##@test_gof.sienaFit gof method for sienaFit
-test_gof.sienaFit <- sienaGOF
-
 ##@sienaGOF siena07 Does test for goodness of fit
 sienaGOF <- function(
 		object,	auxiliaryFunction,
