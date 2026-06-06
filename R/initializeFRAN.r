@@ -271,7 +271,20 @@ initializeFRAN <- function(z, x, data, effects, prevAns=NULL, initC,
 		{
 			if (!is.null(prevAns) && inherits(prevAns, "sienaFit"))
 			{
-				effects <- updateTheta(effects, prevAns)
+				if (is.null(x$useOneStep))
+				{
+					x$useOneStep <- FALSE
+				}
+				if (x$useOneStep)
+				{
+					keepStill <- which(prevAns$fixed)
+					if (length(keepStill == 0))
+					{
+						keepStill <- 0
+					}				
+				}
+				effects <- update_theta(effects, prevAns, 
+							onestep=x$useOneStep, keepUnchanged=keepStill)
 			}
 		}
 		## add any effects needed for settings model
@@ -2135,24 +2148,17 @@ updateTheta <- function(effects, prevAns, varName=NULL)
 update_theta  <- function(x, ...) UseMethod("update_theta", x)
 
 ##@updateTheta.sienaEffects Copy theta values from previous fit
-update_theta.sienaEffects <- function(x, prevAns, varName=NULL, onestep=FALSE, freed=0, r=1, ...){
+update_theta.sienaEffects <- function(x, prevAns, varName=NULL, 
+				onestep=FALSE, keepUnchanged=0, r=1, ...){
 	eff <- updateTheta(x, prevAns=prevAns, varName=varName)
 	if (onestep)
 	{
-		if (is.null(prevAns$oneStep))
-		{
-			stop("prevAns does not contain any fixed-and-tested effects. Do not use onestep.")
-		}
+		est_onestep <- estimate_onestep(prevAns, fixed=keepUnchanged)
 		effsF <- prevAns$requestedEffects 
 		requested <- which(names(prevAns$requestedEffects)=="requested")
-		if (min(freed) > 0)
-		{
-			effsF$test[freed] <- FALSE
-			effsF$fix[freed] <- FALSE
-		}
-		effsF$initialValue <- prevAns$theta + r*prevAns$oneStep
-# If this leads to an error, perhaps
-#	effsF$initialValue[!effsF$basicRate[effsF$include]]  <- prevAns$theta + r*prevAns$oneStep
+		effsF$initialValue <- est_onestep
+# If this leads to an error, perhaps use (?)
+#	effsF$initialValue[!effsF$basicRate[effsF$include]] <- prevAns$theta + r*prevAns$oneStep
 		eff[eff$effectNumber %in% effsF$effectNumber,] <- subset(effsF ,select = -requested)
 	}
 	eff	

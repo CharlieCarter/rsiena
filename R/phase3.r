@@ -102,7 +102,7 @@ phase3.2 <- function(z, x, ...)
 	z <- CalculateDerivative3(z, x)
 	if (!x$simOnly)
 	{
-		z <- PotentialNR(z, x, FALSE) # this calculates z$dinv
+		z <- PotentialNR(z, x, FALSE) # this calculates z$dinv 
 	}
     if (any(z$newfixed))
     {
