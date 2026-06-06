@@ -1,3 +1,33 @@
+2026-06-06
+
+# RSiena 1.6.8
+
+## Changes in RSiena:
+### Effects
+  * Selection of effects for combinations of two dependent networks
+    and an actor covariate improved, which leads to including
+    more effects for combinations where one of the dependent networks
+    is bipartite.
+### Functionality
+  * New function `estimate_onestep`.
+  * Option `onestep` for `update_theta.sienaEffects` changed.
+  * Hidden option to use the one-step estimator with `prevAns` in `siena`
+    (`initializeFRAN.r`).
+  * `print.sienadata` now specifies the node sets for covariates
+    and restricts printed line lengths to 64.
+  * More informative error message in `make_data_rsiena` if the number
+    of elements of the second node set for bipartite networks is not correct.
+  * In `transformScript`, the replacement for `descriptives.sienaGOF`
+    was put before the replacement for `sienaGOF`. 
+  * Error message in `effectsDocumentation` if the set of `effectGroups`
+    included is incorrect (meaningful only for checking the package).
+### Coding
+  * Reorganization and clarification of `effectGroups` for combinations 
+    of two dependent networks and an actor covariate: 
+    these now are `covarNetNetObjective`, `covarAWNetNetObjective`,
+    `covarADNetNetObjective`, `covarBNetNetObjective`, `covarBXNetNetObjective`
+    (`effects.r`, `effectsDocumentation.r`).
+
 2026-05-15
 
 # RSiena 1.6.7

@@ -216,7 +216,7 @@ by Mark Huisman, Michael Schweinberger, Christian Steglich,
 and Viviana Amati.
 
 This manual is frequently updated, mostly only in a minor way.
-This version was renewed for \RS version1.6.7.
+This version was renewed for \RS version1.6.8.
 
 In version 1.6, the names of \RS functions have undergone
 important changes. This manual is for the new names.
@@ -1187,7 +1187,7 @@ For technical problems running \rs, follow the following points.
   of \rs. Details of the latest version available can
   be found at the `Downloads' page.
   The version is
-  identified by a version number (e.g., 1.6.7).
+  identified by a version number (e.g., 1.6.8).
   You can find the number of your current installed version by
   opening \R, and typing\\
   \verb|packageVersion("RSiena")|   \\
@@ -2778,7 +2778,7 @@ is only in the internal programming code, and the
 possible values of the \texttt{type} of effect
 as specified in the effects object and the
 functions \sfn{set\_effect} and \sfn{set\_effect}
-are only \texttt{eval}, \texttt{creat}, and \texttt{endow}.
+are only \texttt{eval}, \texttt{creation}, and \texttt{endow}.
 In Chapter~\ref{S_math} almost all effects are evaluation effects,
 and the effects that are elementary (and not evaluation) effects
 are mentioned as such.
@@ -7498,7 +7498,7 @@ of hypothesized values as given by the  \sfn{prevAns} option.
 Since the presentation of the results includes the
 hypothesized value, there is no reason for doubt as to what
 has been done. However, mostly this is not what is desired,
-and therefore it usually will be preferable to proceed as follows.
+and therefore it often will be preferable to proceed as follows.
 First update the initial values using \sfn{update\_theta}, then
 set the hypothesized value by \sfn{set\_effect}, and then
 carry out the estimation and score-type test by \sfn{siena}.
@@ -7515,18 +7515,42 @@ summary(myans1)
 
 \subsubsection{One-step estimates}
 
-The output file \texttt{mydata\_out.txt},
-mentioned in Section~\ref{S_output},
-also contains so-called \emph{one-step estimates}.
-These are `quick and easy' estimates which are not totally
+Related to the score-type test are the so-called \emph{one-step estimates}.
+These are `quick and easy' estimates which are not
 reliable, but which can be used as approximations of the unrestricted estimates
 (that is, the estimates that would be obtained if the model were estimated
 once again, but without restricting the parameter by \texttt{fix = TRUE}).
 They are explained mathematically in \citet{Schweinberger12}.
 Their computational advantage is based on the fact that they require simulations
-only for parameter vectors where this parameter is fixed (usually, to 0;
+only for parameter vectors where this parameter is fixed.
+Often, when parameters are fixed, they are fixed to 0;
 but other values could be used, and this would be preferable if they are closer
-to the resulting estimate).
+to an appropriate value for this parameter.
+
+The one-step estimates are more reliable according as
+the significance of the fixed-and-tested effects is smaller
+and there is less collinearity
+between the estimated and the fixed parameters.
+
+Continuing the above example, the one-step estimates can be obtained from
+\begin{verbatim}
+test_parameter(ans, method="score", tested=NULL, onestep=TRUE)
+\end{verbatim}
+Sometimes, e.g., if there are strong collinearities between the fixed
+parameters, some or many of the one-step estimates are large (larger than 10
+in absolute value). Then they are useless -- although they may be useful to indicate
+which parameters are collinear with each other.
+
+If the one-step estimates have reasonable values,
+an alternative to the procedure mentioned above (leading to \texttt{myans1})
+is to put the one-step estimates in the effects object.
+E.g., if answer object \texttt{ans} was obtained using effects object \texttt{myeff}
+and there was only one fixed-and-tested effect, with number~10, the
+commands that could be given are
+\begin{verbatim}
+myeff2  <- update_theta(myeff, ans, onestep=TRUE, freed=10)
+(myans2 <- siena(data=mydata, effects=myeff2))
+\end{verbatim}
 
 
 \subsection{Alternative application: convergence problems}
@@ -7543,6 +7567,8 @@ The test statistic can be exploited as a guide in the process of
 restricting and estimating models, as small values of the test
 statistic indicate that the imposed restriction on the parameters is
 not problematic.
+As mentioned above, the  one-step estimates can be a guide
+to indicate which parameters are collinear.
 
 \subsection{Testing differences between independent groups or periods}
 
@@ -10001,7 +10027,7 @@ the {\em number of four-cycles} with shortName \texttt{(cycle4)}; \\
  $i \rightarrow h \rightarrow j$.\\
  When using this effect to represent a particular theoretical mechanism,
  it may be advisable to use it as separate creation
- and endowment effects (using  \texttt{type=creat} and \texttt{type=endow}),
+ and endowment effects (using  \texttt{type=creation} and \texttt{type=endow}),
  to avoid this ambiguity.
  For representing network closure it may be preferable to use one of the many other
  effects representing it (\texttt{transTrip}, \texttt{transTies},
@@ -13229,6 +13255,55 @@ and the dyadic covariate $U$ as \texttt{covar2}.
 
 \begin{enumerate}
 \setcounter{enumi}{\value{savenumi}}
+
+
+ \item
+\begin{minipage}[t]{.7\textwidth}
+ {\em  W, weighted by $U$, leading to agreement along X}, \\
+ ($X$: $W$ weighted by $U$ to agreement) \texttt{(toU)} \\[0.2em]
+ $s^{\rm net}_{i\vit}(x) = \sum_{j \neq h} x_{ij}\, w_{ih}\, u_{ih}\, x_{hj}\,$;\\[0.2em]
+ this refers to the closure of mixed $W-X$ two-paths,
+ weighted by the dyadic covariate $U$;
+ the contribution of the tie $i \stackrel{X}{\rightarrow} j$
+ is proportional to
+ the sum of $u_{ih}$ for all mixed $W-X$ two-paths
+ $i \stackrel{W}{\rightarrow} h \stackrel{X}{\rightarrow} j$.\\
+ This is an elementary effect for actor $i$:
+ only the $x_{ij}$ tie indicator in the formula,
+ corresponding to  the tie $i \stackrel{X}{\rightarrow} j$,
+ is the dependent variable here.\\
+ The interpretation is that actors have the tendency to make the same
+ outgoing $X$-choices as those to whom they have a $W$-tie,
+ weighted by $U$.\\
+ Here $W$ is \texttt{covar1} and $U$ is \texttt{covar2}.\\
+ This will be suitable mainly for non-centered covariates $U$,
+ for which the term `weight' is appropriate.
+      \end{minipage}
+\hfill
+\begin{minipage}[t]{.15\textwidth}
+\linethickness{0.3pt}
+\vfill
+\begin{center}
+\beginpicture
+\setcoordinatesystem units <0.8cm,0.8cm> point at 4 3
+\setplotarea x from 2 to 4, y from 0 to 3
+\put{\large$\bullet$} at  2 1
+\put{\large$\bullet$} at  4 1
+\put{\large$\bullet$} at  3 2.732
+\put{$i$} at 2 0.4
+\put{$j$} at 4 0.4
+\put{$h$} at 3 3.4
+\put{{\small $W, \ U$}} at 1.8 1.9
+\put{{\small $X$}} at 3.9 1.9
+\put{{\small $X$}} at 3   0.6
+\arrow <2mm> [.2,.6]  from 2.2 1 to 3.8 1
+\arrow <2mm> [.2,.6]  from 2.1 1.1732 to 2.9 2.559
+\arrow <2mm> [.2,.6]  from 3.1 2.559 to 3.9 1.1732
+\endpicture
+\end{center}
+\vfill
+\end{minipage}
+
  \item
 \begin{minipage}[t]{.6\textwidth}
  {\em shared W weighted by U leading to agreement along X},
@@ -14282,53 +14357,6 @@ covariate $V$.
 
 
 
- \item
-\begin{minipage}[t]{.7\textwidth}
- {\em  W, weighted by $U$, leading to agreement along X}, \\
- ($X$: $W$ weighted by $U$ to agreement) \texttt{(toU)} \\[0.2em]
- $s^{\rm net}_{i\vit}(x) = \sum_{j \neq h} x_{ij}\, w_{ih}\, u_{ih}\, x_{hj}\,$;\\[0.2em]
- this refers to the closure of mixed $W-X$ two-paths,
- weighted by the dyadic covariate $U$;
- the contribution of the tie $i \stackrel{X}{\rightarrow} j$
- is proportional to
- the sum of $u_{ih}$ for all mixed $W-X$ two-paths
- $i \stackrel{W}{\rightarrow} h \stackrel{X}{\rightarrow} j$.\\
- This is an elementary effect for actor $i$:
- only the $x_{ij}$ tie indicator in the formula,
- corresponding to  the tie $i \stackrel{X}{\rightarrow} j$,
- is the dependent variable here.\\
- The interpretation is that actors have the tendency to make the same
- outgoing $X$-choices as those to whom they have a $W$-tie,
- weighted by $U$.\\
- Here $W$ is \texttt{covar1} and $U$ is \texttt{covar2}.\\
- This will be suitable mainly for non-centered covariates $U$,
- for which the term `weight' is appropriate.
-      \end{minipage}
-\hfill
-\begin{minipage}[t]{.15\textwidth}
-\linethickness{0.3pt}
-\vfill
-\begin{center}
-\beginpicture
-\setcoordinatesystem units <0.8cm,0.8cm> point at 4 3
-\setplotarea x from 2 to 4, y from 0 to 3
-\put{\large$\bullet$} at  2 1
-\put{\large$\bullet$} at  4 1
-\put{\large$\bullet$} at  3 2.732
-\put{$i$} at 2 0.4
-\put{$j$} at 4 0.4
-\put{$h$} at 3 3.4
-\put{{\small $W, \ U$}} at 1.8 1.9
-\put{{\small $X$}} at 3.9 1.9
-\put{{\small $X$}} at 3   0.6
-\arrow <2mm> [.2,.6]  from 2.2 1 to 3.8 1
-\arrow <2mm> [.2,.6]  from 2.1 1.1732 to 2.9 2.559
-\arrow <2mm> [.2,.6]  from 3.1 2.559 to 3.9 1.1732
-\endpicture
-\end{center}
-\vfill
-\end{minipage}
-
 \setcounter{savenumi}{\value{enumi}}
 \end{enumerate}
 
@@ -14503,7 +14531,9 @@ where $\bar v$ is (again) the global mean of $V$.
 \setcounter{savenumi}{\value{enumi}}
 \end{enumerate}
 
-\noindent
+
+\paragraph{Effects for three networks}
+
 The following is an effect for three networks:
 the dependent network is $X$, the two explanatory networks are $W$ and $Z$.
 
@@ -17706,12 +17736,12 @@ might remind you to set the property of \textsf{eol-style} on them when you add
 them to the repository.
 \item [Check] Checking is a process designed to ensure that packages are likely
   to work correctly when installed. Type
-\verb|R CMD check RSiena_1.6.7.tar.gz|\\
+\verb|R CMD check RSiena_1.6.8.tar.gz|\\
 (where the version number is adjusted to match the tar ball name.)
 \item[zip file] To make a zip file that can be used in Windows for
 `installing from a local zip file', and therefore is easy for distribution
 to others, type\\
-\verb|R CMD INSTALL --build RSiena_1.6.7.tar.gz| \\
+\verb|R CMD INSTALL --build RSiena_1.6.8.tar.gz| \\
 (where again the version number is adjusted to match the tar ball name.)
 \end{description}
 
@@ -18196,10 +18226,16 @@ sum(pmin(rowSums(s502),3))
 
 For two-mode networks the difference between the two node sets implies
 some peculiarities.
-Recall that effectGroups are used in the file \texttt{allEffects.csv}
+Recall that effectGroups define combinations of dependent variable, 
+effect type, and covariates (if any). 
+They are used in the file \texttt{allEffects.csv}
 and in function \sfn{effects.r}.
+In the output of \sfn{effectsDocumentation()} 
+(mentioning no effects object), the effectGroups are 
+given as categories of the effects.
 
-In the function \textsf{make\_specification} in file \sfn{effects.r}, some additional
+In the function \textsf{make\_specification} in file \sfn{effects.r}, 
+some additional
 measures are taken for effects in effectGroup \sfn{covarBipartiteObjective},
 because this effect group does not differentiate between effects of covariates
 defined on the first or on the second mode.
@@ -18229,26 +18265,6 @@ the following effectGroup is defined:
 \end{itemize}
 \medskip
 
-For effects defined for two dependent networks and one actor covariate,
-the following effectGroups are defined:
-\begin{itemize}
-\item \sfn{covarNetNetObjective} is for effects where the second network is one-mode;
-\item \sfn{covarABNetNetObjective} is without restriction on the modes;
-\item \sfn{covarANetNetObjective}  is for effects where, if the second network is two-mode,
-     the covariate is defined for the first node set;
-\item \sfn{covarBNetNetObjective} is for effects where, if the second network is two-mode,
-     the covariate is defined for the second node set.
-\end{itemize}
-\medskip
-
-For effects defined for a two-mode dependent network, another dependent
-network (in the role of explanatory; whether one- or two-mode), and one actor covariate,
-the following effectGroup is defined:
-\begin{itemize}
-\item \sfn{covarABipNetObjective} for covariates defined for the first node set.
-\end{itemize}
-\medskip
-
 Further some of the complex effectGroups are the following.
 For co-evolution of multiple networks:
 \begin{itemize}
@@ -18273,17 +18289,50 @@ For co-evolution of multiple networks:
     in the role of explanatory network;
 \item \sfn{bipartiteBipartiteObjective} is for combination of two
     two-mode networks, one in the role of dependent network and the other
-    in the role of explanatory network;
+    in the role of explanatory network.
+\end{itemize}
+\medskip
+
+For effects defined for two dependent networks,
+$X$ in the role of dependent network and $W$ in the role
+of explanatory network, and one actor covariate $V$,
+the following effectGroups are defined:
+\begin{itemize}
+\item \sfn{covarNetNetObjective} is for effects where
+        both networks are one-mode;
+\item \sfn{covarANetNetObjective} is for effects where
+        $X$ is one-mode, and if $W$ is two-mode, 
+        $V$ is defined for the first mode;
+\item \sfn{covarAWNetNetObjective} is for effects where
+        $W$ is one-mode, and $V$ is defined for the first mode;
+\item \sfn{covarADNetNetObjective} is for effects where,
+        if $W$ is two-mode, $V$ is defined for the first mode,
+        and both networks should have the same second mode;
+\item \sfn{covarBNetNetObjective} is for effects where,
+        if $W$ is two-mode,
+         $V$ is defined for the second mode;
+\item \sfn{covarBXNetNetObjective} is for effects where,
+        if $W$ is two-mode,
+        $X$ should be one-mode, and $V$ is defined for the second mode.
+\end{itemize}
+\medskip
+
+For effects defined for two dependent networks,
+$X$ in the role of dependent network and $W$ in the role
+of explanatory network, and a dyadic covariate,
+the following effectGroups are defined:
+
+\begin{itemize}
 \item \sfn{dyadANetNetObjective} is for combinations
     of two networks and a dyadic covariate, where the network in the role
-    of dependent network should be one-mode, and the dyadic covariate
+    of dependent network ($X$) should be one-mode, and the dyadic covariate
     should be on the node set (`squared') of the dependent network;
 \item \sfn{dyadBNetNetObjective} is for combinations
     of two networks and a dyadic covariate, where the dyadic covariate
     should have the same first and second node sets
-    as the explanatory network;
+    as the explanatory network.
 \end{itemize}
-\medskip
+
 
 \noindent
 For dependent behavioral variables:
@@ -18359,6 +18408,44 @@ Changes in RSiena:
 \fi
 
 
+\item 2026-06-06 GitHub, package version 1.6.8.
+
+Changes in RSiena:
+\begin{itemize}
+  \item Effects:
+    \begin{itemize}
+  \item Selection of effects for combinations of two dependent networks
+    and an actor covariate improved, which leads to including
+    more effects for such combinations where one of the dependent networks
+    is bipartite (see `coding' below).
+    \end{itemize}
+  \item Improvements of functionality:
+    \begin{itemize}
+  \item New function \sfn{estimate\_onestep}.
+  \item Option \texttt{onestep} for \sfn{update\_theta.sienaEffects} changed.
+  \item Hidden option to use the one-step estimator with 
+      \texttt{prevAns} in \sfn{siena}.
+  \item \sfn{print.sienadata} now specifies the node sets for covariates
+    and restricts printed line lengths to 64.
+  \item More informative error message in \sfn{make\_data\_rsiena} if the number
+    of elements of the second node set for bipartite networks is not correct.
+  \item In \sfn{transformScript}, the replacement for \sfn{descriptives.sienaGOF}
+    was put before the replacement for \sfn{sienaGOF}.
+    \end{itemize}
+  \item Coding:
+    \begin{itemize}
+  \item Reorganization and clarification of \texttt{effectGroups} for combinations
+    of two dependent networks and an actor covariate:
+    these now are \texttt{covarNetNetObjective}, \\
+    \texttt{covarANetNetObjective},\texttt{covarAWNetNetObjective},\\
+    \texttt{covarADNetNetObjective}, 
+    \texttt{covarBNetNetObjective},\\
+    \texttt{covarBXNetNetObjective}.
+    See Section~\ref{S_notestwomode}.
+    \end{itemize}
+\end{itemize}
+
+
 \item 2026-05-15 GitHub, package version 1.6.7.
 
 Changes in RSiena:
@@ -18366,10 +18453,10 @@ Changes in RSiena:
 \item Improvements of functionality:
    \begin{itemize}
      \item Option \texttt{onestep}  for \sfn{test\_parameter(..., method="score", ...)} .
-     \item Option \texttt{onestep}  for \sfn{update\_theta} .
+     \item Option \texttt{onestep}  for \sfn{update\_theta}.
   \item Name \texttt{sienaNet}  added to \sfn{transformScript}  as one of the names
     to be replaced.
-  \item \sfn{make\_effects}  now also works for \texttt{sienadata}  
+  \item \sfn{make\_effects}  now also works for \texttt{sienadata}
   objects older than 1.4.10.
    \end{itemize}
 \end{itemize}
