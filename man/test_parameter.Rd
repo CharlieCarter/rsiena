@@ -149,13 +149,11 @@ for (i in which(ans$test)){
    print(sct)}
 # Testing that endowment and creation effects are identical:
 myeff1 <- make_specification(mydata)
-myeff1 <- set_effect(myeff1, list(transTrip, transTies))
-
-myeff1 <- make_specification(mydata)
+myeff1 <- set_effect(myeff1, transTrip)
 myeff1 <- set_effect(myeff1, recip, include=FALSE)
 myeff1 <- set_effect(myeff1, recip, type='creation')
 (myeff1 <- set_effect(myeff1, recip, type='endow'))
-ans1 <- siena(mydata, effects=myeff1, control_algo=myalgo, batch=TRUE)
+(ans1 <- siena(mydata, effects=myeff1, control_algo=myalgo, batch=TRUE))
 test_parameter(ans1, method="same", tested=2, tested2=3)
 }
 \keyword{tests}

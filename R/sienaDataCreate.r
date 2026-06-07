@@ -245,7 +245,12 @@ sienaDataCreate<- function(..., nodeSets=NULL, getDocumentation=FALSE)
 			warning(paste("node set",nodeSetName,"not found in",nodeSetNames,'\n'),
 					immediate. = TRUE)
 		}
-		n == length(nodeSets[[sub]])
+		valid <- (n == length(nodeSets[[sub]]))
+		if (!valid)
+		{
+			cat("node set",nodeSetName,"has", length(nodeSets[[sub]]), ", not", n, "elements\n")
+		}
+		valid
 	}
 	if (getDocumentation)
 	{
@@ -658,10 +663,10 @@ sienaDataCreate<- function(..., nodeSets=NULL, getDocumentation=FALSE)
 		sparse <- attr(depvars[[i]], 'sparse')
 		myarray <- depvars[[i]]
 		if (!validNodeSet(nattr[1], netdims[1]))
-			stop('1st net dimension wrong')
+			stop('1st net dimension is wrong')
 		if (type =='bipartite')
 			if (!validNodeSet(nattr[2], netdims[2]))
-				stop('2nd net dimension wrong')
+				stop('2nd net dimension is wrong')
 		attr(depvars[[i]], 'uponly') <- rep(FALSE, observations - 1)
 		attr(depvars[[i]], 'downonly') <- rep(FALSE, observations - 1)
 		attr(depvars[[i]], 'distance') <- rep(FALSE, observations - 1)
