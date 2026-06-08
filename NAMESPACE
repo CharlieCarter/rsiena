@@ -3,7 +3,7 @@ useDynLib(RSiena, .registration = TRUE, .fixes="C_")
 export(
 	coCovar, coDyadCovar, varCovar, varDyadCovar, as_covariate_rsiena,
 	sienaNet, sienaDependent, as_dependent_rsiena,
-	getEffects, print01Report, write_report, siena07, siena,
+	getEffects, print01Report, write_report, siena07, siena, estimate_onestep,
 	sienaCompositionChange, updateTheta, updateSpecification,
 	sienaCompositionChangeFromFile, sienaDataCreate, make_data_rsiena,
 	sienaGroupCreate, make_group_rsiena,
@@ -14,9 +14,10 @@ export(
    effectsDocumentation, sienaDataConstraint, print.xtable.sienaFit, 
 	siena08, meta_siena, iwlsm, sienaTimeTest,
 	includeTimeDummy, sienaGOF, descriptives, interpret_size,
-	interpret_size_dynamics, sparseMatrixExtraction, networkExtraction, behaviorExtraction,
+	interpret_size_dynamics, sparseMatrixExtraction, 
+   networkExtraction, behaviorExtraction,
 	OutdegreeDistribution, IndegreeDistribution, BehaviorDistribution,
-	TriadCensus, mixedTriadCensus, dyadicCov, egoAlterCombi,
+	TriadCensus, mixedTriadCensus, dyadicCov, egoAlterCombi, egoAlterCovarComb,
 	siena_table, xtable, score.Test, Wald.RSiena, Multipar.RSiena, 
    testSame.RSiena, funnelPlot, meta.table,
 	influenceTable, selectionTable,
@@ -52,6 +53,7 @@ importFrom("utils", "browseURL", "edit",
            "flush.console", "getFromNamespace", "object.size",
            "packageDescription", "read.csv",
            "read.table", "write.csv", "write.table")
+importFrom("network", "network.initialize", "network.edgelist")
 S3method(print, sienadata)
 S3method(print, siena)
 S3method(make_specification, sienadata)

@@ -51,6 +51,38 @@ print.sienadata <- function(x, ...)
 			}
 		}
 	}
+    ##@printWithLineMax internal print.siena; prints character strings
+	printWithLineMax <- function(heading, contents, contentkinds){
+	# function to print contents with categories contentkinds
+	# with a heading; line length maximum 4 + 60
+	# heading is a character string, 
+	# contents and contentkinds are characters strings of the same length
+		if (length(contents) != length(contentkinds))
+		{
+			stop("Error in printWithLineMax: contents and contentkinds have different length")
+		}
+		vsets <- unique(contentkinds)
+		for (vk in vsets)
+		{
+			cat(heading, "<", vk, "> : \n")
+			contentk <- contents[contentkinds==vk]
+			cumlength <- 0
+			cat("   ")
+			for (k in seq_along(contentk))
+			{
+				cumlength <- cumlength + nchar(contentk[k])
+				if (cumlength > 60)
+				{
+					cat("\n   ")
+					cumlength <- 0
+				}
+				cat(contentk[k])
+				if (k < length(contentk)){cat(", ")}				
+			}
+			cat("\n")
+		}
+		cat("\n")
+	}	
 # begin main method siena.print proper
 	if ((!inherits(x, "sienadata")) & (!inherits(x, "siena")))
 	{
@@ -127,22 +159,31 @@ print.sienadata <- function(x, ...)
 
 	if (length(x$cCovars) > 0)
 	{
-		cat('Constant covariates: ', paste(names(x$cCovars), collapse=", "), "\n")
+		vnodesets <- sapply(x$cCovars, function(v){attr(v,"nodeSet")})
+		printWithLineMax("Constant covariates for node set", names(x$cCovars), vnodesets)	
 	}
 	if (length(x$vCovars) > 0)
 	{
-		cat('Changing covariates: ',
-			paste(names(x$vCovars), collapse = ", "), "\n")
-	}
+		vnodesets <- sapply(x$vCovars, function(v){attr(v,"nodeSet")})
+		printWithLineMax("Changing covariates for node set", names(x$vCovars), vnodesets)
+	}	
 	if (length(x$dycCovars) > 0)
 	{
-		cat('Constant dyadic covariates: ',
-			paste(names(x$dycCovars), collapse=", "), "\n")
+		kindNodeSets <- rep("", length(x$dycCovars))
+		for (k in seq_along(x$dycCovars))
+		{
+			kindNodeSets[k] <- paste(attr(x$dycCovars[[k]],"nodeSet"), collapse=", ")
+		}
+		printWithLineMax("Constant dyadic covariates for node sets", names(x$dycCovars), kindNodeSets)
 	}
 	if (length(x$dyvCovars) > 0)
 	{
-		cat('Changing dyadic covariates: ',
-			paste(names(x$dyvCovars), collapse=", "), "\n")
+		kindNodeSets <- rep("", length(x$dyvCovars))
+		for (k in seq_along(x$dyvCovars))
+		{
+			kindNodeSets[k] <- paste(attr(x$dyvCovars[[k]],"nodeSet"), collapse=", ")
+		}
+		printWithLineMax("Changing dyadic covariates for node sets", names(x$dyvCovars), kindNodeSets)
 	}
 
 	onlys(x, 'uponly')

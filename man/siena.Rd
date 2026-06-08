@@ -1,7 +1,7 @@
 \name{siena}
 \alias{siena}
-\alias{siena.sienadata}
 \alias{siena07}
+\alias{estimate_onestep}
 \concept{estimation}
 \title{Function to estimate parameters in a Siena model}
 \description{
@@ -33,6 +33,8 @@ siena07(alg, batch=FALSE, verbose=FALSE, silent=FALSE,
         initC=TRUE, clusterString=rep("localhost", nbrNodes), tt=NULL,
         parallelTesting=FALSE, clusterIter=!alg$maxlike,
         clusterType=c("PSOCK", "FORK"), cl=NULL, ...)
+
+estimate_onestep(x, fixed=x$fixed, r=1, shortenNames=FALSE)
       }
 \arguments{
   \item{data}{Siena data set of class \code{\link{sienadata}}. }
@@ -97,7 +99,7 @@ siena07(alg, batch=FALSE, verbose=FALSE, silent=FALSE,
     \code{prevAns} if a previous reasonable
     provisional estimate was obtained for a similar model;\cr
     the following are ignored by \code{siena}
-    (because included here or in \code{control_out}) 
+    (because included here or in \code{control_out})
     but can be mentioned when using \code{siena07}:\cr
     in any case, \code{data} and \code{effects}, as in the examples below;\cr
     possibly also \code{returnDeps} if the simulated dependent variables
@@ -106,6 +108,16 @@ siena07(alg, batch=FALSE, verbose=FALSE, silent=FALSE,
     if the simulated sequences (chains) of ministeps or the simulated
     change statistics (contributions) should be returned;
     this may produce a very big file.}
+  \item{x}{Object of class \code{sienaFit}.}
+  \item{fixed}{One number or a vector of numbers between 1 and \code{p},
+      where \code{p = x$pp}, the number of parameters in \code{x}
+      excluding the basic rate parameters used for
+      conditional estimation; these indicate the fixed parameters.
+      Can also be a logical vector, of length \code{p} indicating
+      these by their numbers as given in the print of \code{x}.}
+  \item{r}{Real number, preferably in \code{(0.1]}.}
+  \item{shortenNames}{Logical. Should the effect names
+    be shortened?}
 }
 \details{
   This is the main function and workhorse of \code{RSiena}.
@@ -129,7 +141,7 @@ siena07(alg, batch=FALSE, verbose=FALSE, silent=FALSE,
  For continuous behavior variables defined with \code{type="continuous"} in \cr
  \code{\link{as_dependent_rsiena}}, estimation is done as
  described in Niezink and Snijders (2017).\cr
- If  \code{maxlike=TRUE} in \code{control_algo}, 
+ If  \code{maxlike=TRUE} in \code{control_algo},
  estimation is done by Maximum Likelihood
  implemented as in Snijders, Koskinen and Schweinberger (2010).\cr
  Phase 1 does a few iterations to
@@ -220,6 +232,12 @@ siena07(alg, batch=FALSE, verbose=FALSE, silent=FALSE,
  of the algorithm.\cr
  Note that covariates should have large enough standard deviations
  for parameters to have moderate values; see the manual.
+
+ Function \code{estimate_onestep} gives the one-step estimate from the
+ estimates in \code{x}, where the parameters indicated in \code{fixed}
+ are fixed at their values given in \code{x$requestedEffects}.
+ The step from the current estimate to the one-step estimate
+ is multiplied by \code{r}.
 }
 \value{
   Returns an object of class \code{\link{sienaFit}}, some parts of which are:
@@ -243,7 +261,8 @@ siena07(alg, batch=FALSE, verbose=FALSE, silent=FALSE,
     if \code{x$simOnly=TRUE}.}
   \item{se}{Vector of standard errors of estimated theta,
     if \code{x$simOnly=FALSE}.}
-  \item{dfra}{Matrix of estimated derivatives.}
+  \item{dfra}{Jacobian matrix of estimated derivatives of expected values
+     of estimation statistics w.r.t. parameters.}
   \item{sf}{Matrix of simulated deviations from targets in phase 3.}
   \item{sf2}{Array of periodwise deviations from simulations in phase 3.
     Not included if \code{x$lessMem=TRUE}.}
@@ -412,7 +431,7 @@ ans3 <- siena07(myalgorithm, data=mydata, effects=myeff, batch=TRUE, cl = cl)
 # simulate behavior data according to dZ(t) = [-0.1 Z + 1] dt + 1 dW(t)
 set.seed(123)
 y1 <- rnorm(50, 0,3)
-y2 <- exp(-0.1) * y1 + (1-exp(-0.1)) * 1/ -0.1 + 
+y2 <- exp(-0.1) * y1 + (1-exp(-0.1)) * 1/ -0.1 +
                        rnorm(50, 0, (exp(-0.2)- 1) / -0.2 * 1^2)
 friend <- as_dependent_rsiena(array(c(s501, s502), dim = c(50,50,2)))
 behavior <- as_dependent_rsiena(matrix(c(y1,y2), 50,2), type = "continuous")

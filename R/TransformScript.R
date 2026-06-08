@@ -70,6 +70,7 @@ transformScript <- function(theoldscript, fileName="newScript.R",
 ################################################################################
 
 namePairs <- list(c("sienaDependent", "as_dependent_rsiena"),
+   c("sienaNet", "as_dependent_rsiena"),
    c("coCovar", "as_covariate_rsiena"),
    c("varDyadCovar", "as_covariate_rsiena"),
    c("sienaCompositionChange", "as_composition_rsiena"),
@@ -81,11 +82,10 @@ namePairs <- list(c("sienaDependent", "as_dependent_rsiena"),
    c("getEffects", "make_specification"),
    c("sienaDataConstraint", "make_constraint"),
    c("siena.table", "write_result"),
-   c("Multipar.RSiena", "test_parameter"),
    c("sienaTimeTest", "test_time"),
+   c("descriptives.sienaGOF", "descriptives"),
    c("sienaGOF", "test_gof"),
    c("siena08", "meta_siena"),
-   c("descriptives.sienaGOF", "descriptives"),
    c("selectionTable", "interpret_selection"),
    c("influenceTable", "interpret_influence"),
    c("sienaRIDynamics", "interpret_size_dynamics"),
@@ -109,7 +109,7 @@ namePairs <- list(c("sienaDependent", "as_dependent_rsiena"),
 
 furtherNames <- list("sienaAlgorithmCreate", "siena07",
 					"varCovar", "coDyadCovar", "includeEffects", "setEffect",
-					"includeInteraction", "sienaRI", 
+					"includeInteraction", "sienaRI", "Multipar.RSiena",
 					"Wald.RSiena", "testSame.RSiena", "score.Test", 
 					"sienaBayes", "simulateData")
 found <- rep(0, length(namePairs) + length(furtherNames))
@@ -124,6 +124,7 @@ furtherNamePairs <- list(
 		c("setEffect", "set_effect"),
 		c("includeInteraction", "set_interaction"),
 		c("sienaRI", "interpret_size"),
+		c("Multipar.RSiena", "test_parameter"),
 		c("Wald.RSiena", "test_parameter"),
 		c("testSame.RSiena", "test_parameter"),
 		c("score.Test", "test_parameter"),
@@ -347,7 +348,7 @@ transformCommand <- function(funName, oldscript, i, logfile)
 # 	require(stringr) # for str_squish; not used now
 	newline <- NULL
 	oldline <- textBeforeHash(oldscript[i], dropBlanks=TRUE)
-	if (funName %in% c("Wald.RSiena", "testSame.RSiena", "score.Test"))
+	if (funName %in% c("Multipar.RSiena", "Wald.RSiena", "testSame.RSiena", "score.Test"))
 	{ # These may be used without an assignment to a name
 		funNameWith <- paste(funName, "(", sep="")
 	}
@@ -547,6 +548,7 @@ algalgorithm <- function(algo){
 	alg0 <- c(alg0, ndtext("minimumPermutationLength"))
 	alg0 <- c(alg0, ndtext("initialPermutationLength"))
 	alg0 <- c(alg0, ndtext("localML"))
+#browser()
 	alg0
 }
 
@@ -1012,6 +1014,13 @@ zWald.RSiena <- function(A, x)
 }
 
 
+zMultipar.RSiena <- function(x, tested)
+{	
+	text0 <- paste("test_parameter(", deparse1(substitute(x)), ", tested=", 
+				deparse1(substitute(tested)), ")", sep="")
+	text0
+}
+
 zscore.Test <- function(x, tested=NULL)
 {
 	if (is.null(tested))
@@ -1408,6 +1417,12 @@ repeat{
 	theTransform <- transformCommand("sienaRI", thenewscript, i, logfile)
 	i <- theTransform$i
 	if (!is.null(theTransform$newline))
+	{
+		thenewerscript <- c(thenewerscript, theTransform$newline)
+	}
+	theTransform <- transformCommand("Multipar.RSiena", thenewscript, i, logfile)
+	i <- theTransform$i
+	if (!is.null(theTransform$newline)) 
 	{
 		thenewerscript <- c(thenewerscript, theTransform$newline)
 	}

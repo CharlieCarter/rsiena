@@ -258,7 +258,7 @@ double AverageInAlterWeightedContinuousEffect::egoStatistic(int ego, double * cu
 		}
 	}
 
-	if (neighborCount > 0)  //  normally this will be a comparison of 0 against >= 1
+	if (neighborCount > 0 && fabs(totalWeightValue) > EPSILON)
 	{
 		statistic *= currentValues[ego] / totalWeightValue;
 		// Rprintf("Contribution %f.", statistic);

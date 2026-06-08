@@ -257,9 +257,7 @@ double AverageAlterWeightedContinuousEffect::egoStatistic(int ego, double * curr
 		}
 	}
 
-    // may present issue if weight total is negative, though not anticipated
-    // in current use-case
-	if (neighborCount > 0)
+	if (neighborCount > 0 && fabs(totalWeightValue) > EPSILON)
 	{
 		statistic *= currentValues[ego] / totalWeightValue;
 	}
