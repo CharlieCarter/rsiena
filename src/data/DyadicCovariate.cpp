@@ -27,8 +27,10 @@ DyadicCovariate::DyadicCovariate(std::string name,
 	this->lpFirstActorSet = pFirstActorSet;
 	this->lpSecondActorSet = pSecondActorSet;
 	this->lmean = 0;
-	this->lhasTransformedMean = false;
-	this->ltransformedMean = 0;
+	this->lhasLogTransformedMean = false;
+	this->llogTransformedMean = 0;
+	this->lhasAsinhTransformedMean = false;
+	this->lasinhTransformedMean = 0;
 }
 
 
@@ -63,10 +65,20 @@ void DyadicCovariate::mean(double value)
  * Stores a transformed-scale mean supplied by the caller. Effects that do
  * not request a nonlinear transformation ignore this value.
  */
-void DyadicCovariate::transformedMean(double value)
+void DyadicCovariate::logTransformedMean(double value)
 {
-	this->ltransformedMean = value;
-	this->lhasTransformedMean = true;
+	this->llogTransformedMean = value;
+	this->lhasLogTransformedMean = true;
+}
+
+
+/**
+ * Stores an asinh-scale mean supplied by the caller.
+ */
+void DyadicCovariate::asinhTransformedMean(double value)
+{
+	this->lasinhTransformedMean = value;
+	this->lhasAsinhTransformedMean = true;
 }
 
 }

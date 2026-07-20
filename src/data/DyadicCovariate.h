@@ -44,9 +44,12 @@ public:
 	
 	inline double mean() const;
 	void mean(double value);
-	inline bool hasTransformedMean() const;
-	inline double transformedMean() const;
-	void transformedMean(double value);
+	inline bool hasLogTransformedMean() const;
+	inline double logTransformedMean() const;
+	void logTransformedMean(double value);
+	inline bool hasAsinhTransformedMean() const;
+	inline double asinhTransformedMean() const;
+	void asinhTransformedMean(double value);
 	
 private:
 	// One of the involved actor sets
@@ -58,10 +61,13 @@ private:
 	// The average covariate value
 	double lmean {};
 
-	// Optional externally supplied mean on a transformed scale. This permits
-	// simulations of counterfactual covariate values under fitted centering.
-	bool lhasTransformedMean {};
-	double ltransformedMean {};
+	// Optional externally supplied means on named transformed scales. Keeping
+	// these separate prevents a fitted log centre from being reused by an
+	// asinh-transformed effect (or vice versa).
+	bool lhasLogTransformedMean {};
+	double llogTransformedMean {};
+	bool lhasAsinhTransformedMean {};
+	double lasinhTransformedMean {};
 };
 
 
@@ -80,17 +86,33 @@ double DyadicCovariate::mean() const
 /**
  * Returns whether an externally supplied transformed-scale mean is present.
  */
-bool DyadicCovariate::hasTransformedMean() const
+bool DyadicCovariate::hasLogTransformedMean() const
 {
-	return this->lhasTransformedMean;
+	return this->lhasLogTransformedMean;
 }
 
 /**
  * Returns the externally supplied transformed-scale mean.
  */
-double DyadicCovariate::transformedMean() const
+double DyadicCovariate::logTransformedMean() const
 {
-	return this->ltransformedMean;
+	return this->llogTransformedMean;
+}
+
+/**
+ * Returns whether an externally supplied asinh-scale mean is present.
+ */
+bool DyadicCovariate::hasAsinhTransformedMean() const
+{
+	return this->lhasAsinhTransformedMean;
+}
+
+/**
+ * Returns the externally supplied asinh-scale mean.
+ */
+double DyadicCovariate::asinhTransformedMean() const
+{
+	return this->lasinhTransformedMean;
 }
 
 }

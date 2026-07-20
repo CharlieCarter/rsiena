@@ -1234,17 +1234,27 @@ void setupDyadicCovariateGroup(SEXP DYADVARGROUP, Data *pData)
 		SEXP Mean = Rf_getAttrib(VECTOR_ELT(DYADVARGROUP, dyadicCovariate),
 				mean);
 		pConstantDyadicCovariate->mean(REAL(Mean)[0]);
-		SEXP transformedMeanSymbol;
-		PROTECT(transformedMeanSymbol = Rf_install("transformedMean"));
-		SEXP transformedMean = Rf_getAttrib(
+		SEXP logTransformedMeanSymbol;
+		PROTECT(logTransformedMeanSymbol = Rf_install("logTransformedMean"));
+		SEXP logTransformedMean = Rf_getAttrib(
 			VECTOR_ELT(DYADVARGROUP, dyadicCovariate),
-			transformedMeanSymbol);
-		if (transformedMean != R_NilValue && Rf_length(transformedMean) == 1)
+			logTransformedMeanSymbol);
+		if (logTransformedMean != R_NilValue && Rf_length(logTransformedMean) == 1)
 		{
-			pConstantDyadicCovariate->transformedMean(
-				Rf_asReal(transformedMean));
+			pConstantDyadicCovariate->logTransformedMean(
+				Rf_asReal(logTransformedMean));
 		}
-		UNPROTECT(1);
+		SEXP asinhTransformedMeanSymbol;
+		PROTECT(asinhTransformedMeanSymbol = Rf_install("asinhTransformedMean"));
+		SEXP asinhTransformedMean = Rf_getAttrib(
+			VECTOR_ELT(DYADVARGROUP, dyadicCovariate),
+			asinhTransformedMeanSymbol);
+		if (asinhTransformedMean != R_NilValue && Rf_length(asinhTransformedMean) == 1)
+		{
+			pConstantDyadicCovariate->asinhTransformedMean(
+				Rf_asReal(asinhTransformedMean));
+		}
+		UNPROTECT(2);
 		UNPROTECT(3);
 	}
 }
@@ -1336,17 +1346,27 @@ void setupChangingDyadicCovariateGroup(SEXP VARDYADGROUP, Data * pData)
 		SEXP Mean = Rf_getAttrib(VECTOR_ELT(VARDYADGROUP, changingDyadic),
 				mean);
 		pChangingDyadicCovariate->mean(REAL(Mean)[0]);
-		SEXP transformedMeanSymbol;
-		PROTECT(transformedMeanSymbol = Rf_install("transformedMean"));
-		SEXP transformedMean = Rf_getAttrib(
+		SEXP logTransformedMeanSymbol;
+		PROTECT(logTransformedMeanSymbol = Rf_install("logTransformedMean"));
+		SEXP logTransformedMean = Rf_getAttrib(
 			VECTOR_ELT(VARDYADGROUP, changingDyadic),
-			transformedMeanSymbol);
-		if (transformedMean != R_NilValue && Rf_length(transformedMean) == 1)
+			logTransformedMeanSymbol);
+		if (logTransformedMean != R_NilValue && Rf_length(logTransformedMean) == 1)
 		{
-			pChangingDyadicCovariate->transformedMean(
-				Rf_asReal(transformedMean));
+			pChangingDyadicCovariate->logTransformedMean(
+				Rf_asReal(logTransformedMean));
 		}
-		UNPROTECT(1);
+		SEXP asinhTransformedMeanSymbol;
+		PROTECT(asinhTransformedMeanSymbol = Rf_install("asinhTransformedMean"));
+		SEXP asinhTransformedMean = Rf_getAttrib(
+			VECTOR_ELT(VARDYADGROUP, changingDyadic),
+			asinhTransformedMeanSymbol);
+		if (asinhTransformedMean != R_NilValue && Rf_length(asinhTransformedMean) == 1)
+		{
+			pChangingDyadicCovariate->asinhTransformedMean(
+				Rf_asReal(asinhTransformedMean));
+		}
+		UNPROTECT(2);
 		UNPROTECT(3);
 	}
 }
@@ -2281,4 +2301,3 @@ void getScores(SEXP EFFECTSLIST, int period, int group,
 	}
 	UNPROTECT(1);
 }
-

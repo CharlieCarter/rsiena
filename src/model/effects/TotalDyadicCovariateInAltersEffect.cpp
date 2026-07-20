@@ -83,14 +83,18 @@ void TotalDyadicCovariateInAltersEffect::initialize(const Data * pData,
     }
     else
     {
-		const bool hasFixedTransformedMean = this->lpConstantDyadicCovariate
-			? this->lpConstantDyadicCovariate->hasTransformedMean()
-			: this->lpChangingDyadicCovariate->hasTransformedMean();
+		const DyadicCovariate * pDyadicCovariate =
+			this->lpConstantDyadicCovariate
+				? static_cast<const DyadicCovariate *>(this->lpConstantDyadicCovariate)
+				: static_cast<const DyadicCovariate *>(this->lpChangingDyadicCovariate);
+		const bool hasFixedTransformedMean = this->lTransformType == LOG
+			? pDyadicCovariate->hasLogTransformedMean()
+			: pDyadicCovariate->hasAsinhTransformedMean();
 		if (hasFixedTransformedMean)
 		{
-			this->lTransformedDycoMean = this->lpConstantDyadicCovariate
-				? this->lpConstantDyadicCovariate->transformedMean()
-				: this->lpChangingDyadicCovariate->transformedMean();
+			this->lTransformedDycoMean = this->lTransformType == LOG
+				? pDyadicCovariate->logTransformedMean()
+				: pDyadicCovariate->asinhTransformedMean();
 			return;
 		}
 

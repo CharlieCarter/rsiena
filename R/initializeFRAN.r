@@ -1942,15 +1942,18 @@ unpackCDyad<- function(dycCovar)
     attr(edgeLists, "name") <- attr(dycCovar, "name")
     ## add attribute of mean
     attr(edgeLists, "mean") <- attr(dycCovar, "mean")
-	## Optional fitted centering constant for effects that transform totals.
-	transformedMean <- attr(dycCovar, "transformedMean", exact=TRUE)
-	if (!is.null(transformedMean))
+	## Optional fitted centering constants for effects that transform totals.
+	for (attributeName in c("logTransformedMean", "asinhTransformedMean"))
 	{
-		if (length(transformedMean) != 1 || !is.finite(transformedMean))
+		transformedMean <- attr(dycCovar, attributeName, exact=TRUE)
+		if (!is.null(transformedMean))
 		{
-			stop("transformedMean must be one finite numeric value")
+			if (length(transformedMean) != 1 || !is.finite(transformedMean))
+			{
+				stop(attributeName, " must be one finite numeric value")
+			}
+			attr(edgeLists, attributeName) <- as.double(transformedMean)
 		}
-		attr(edgeLists, "transformedMean") <- as.double(transformedMean)
 	}
     return(edgeLists = edgeLists)
 }
@@ -2010,15 +2013,18 @@ unpackVDyad<- function(dyvCovar, observations)
     attr(edgeLists, "name") <- attr(dyvCovar, "name")
     ## add attribute of mean
     attr(edgeLists, "mean") <- attr(dyvCovar, "mean")
-	## Optional fitted centering constant for effects that transform totals.
-	transformedMean <- attr(dyvCovar, "transformedMean", exact=TRUE)
-	if (!is.null(transformedMean))
+	## Optional fitted centering constants for effects that transform totals.
+	for (attributeName in c("logTransformedMean", "asinhTransformedMean"))
 	{
-		if (length(transformedMean) != 1 || !is.finite(transformedMean))
+		transformedMean <- attr(dyvCovar, attributeName, exact=TRUE)
+		if (!is.null(transformedMean))
 		{
-			stop("transformedMean must be one finite numeric value")
+			if (length(transformedMean) != 1 || !is.finite(transformedMean))
+			{
+				stop(attributeName, " must be one finite numeric value")
+			}
+			attr(edgeLists, attributeName) <- as.double(transformedMean)
 		}
-		attr(edgeLists, "transformedMean") <- as.double(transformedMean)
 	}
     return(edgeLists = edgeLists)
 }
