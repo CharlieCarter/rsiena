@@ -44,6 +44,9 @@ public:
 	
 	inline double mean() const;
 	void mean(double value);
+	inline bool hasTransformedMean() const;
+	inline double transformedMean() const;
+	void transformedMean(double value);
 	
 private:
 	// One of the involved actor sets
@@ -54,6 +57,11 @@ private:
 	
 	// The average covariate value
 	double lmean {};
+
+	// Optional externally supplied mean on a transformed scale. This permits
+	// simulations of counterfactual covariate values under fitted centering.
+	bool lhasTransformedMean {};
+	double ltransformedMean {};
 };
 
 
@@ -67,6 +75,22 @@ private:
 double DyadicCovariate::mean() const
 {
 	return this->lmean;
+}
+
+/**
+ * Returns whether an externally supplied transformed-scale mean is present.
+ */
+bool DyadicCovariate::hasTransformedMean() const
+{
+	return this->lhasTransformedMean;
+}
+
+/**
+ * Returns the externally supplied transformed-scale mean.
+ */
+double DyadicCovariate::transformedMean() const
+{
+	return this->ltransformedMean;
 }
 
 }

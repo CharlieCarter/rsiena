@@ -1234,6 +1234,17 @@ void setupDyadicCovariateGroup(SEXP DYADVARGROUP, Data *pData)
 		SEXP Mean = Rf_getAttrib(VECTOR_ELT(DYADVARGROUP, dyadicCovariate),
 				mean);
 		pConstantDyadicCovariate->mean(REAL(Mean)[0]);
+		SEXP transformedMeanSymbol;
+		PROTECT(transformedMeanSymbol = Rf_install("transformedMean"));
+		SEXP transformedMean = Rf_getAttrib(
+			VECTOR_ELT(DYADVARGROUP, dyadicCovariate),
+			transformedMeanSymbol);
+		if (transformedMean != R_NilValue && Rf_length(transformedMean) == 1)
+		{
+			pConstantDyadicCovariate->transformedMean(
+				Rf_asReal(transformedMean));
+		}
+		UNPROTECT(1);
 		UNPROTECT(3);
 	}
 }
@@ -1325,6 +1336,17 @@ void setupChangingDyadicCovariateGroup(SEXP VARDYADGROUP, Data * pData)
 		SEXP Mean = Rf_getAttrib(VECTOR_ELT(VARDYADGROUP, changingDyadic),
 				mean);
 		pChangingDyadicCovariate->mean(REAL(Mean)[0]);
+		SEXP transformedMeanSymbol;
+		PROTECT(transformedMeanSymbol = Rf_install("transformedMean"));
+		SEXP transformedMean = Rf_getAttrib(
+			VECTOR_ELT(VARDYADGROUP, changingDyadic),
+			transformedMeanSymbol);
+		if (transformedMean != R_NilValue && Rf_length(transformedMean) == 1)
+		{
+			pChangingDyadicCovariate->transformedMean(
+				Rf_asReal(transformedMean));
+		}
+		UNPROTECT(1);
 		UNPROTECT(3);
 	}
 }
@@ -2259,5 +2281,4 @@ void getScores(SEXP EFFECTSLIST, int period, int group,
 	}
 	UNPROTECT(1);
 }
-
 

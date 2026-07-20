@@ -27,6 +27,8 @@ DyadicCovariate::DyadicCovariate(std::string name,
 	this->lpFirstActorSet = pFirstActorSet;
 	this->lpSecondActorSet = pSecondActorSet;
 	this->lmean = 0;
+	this->lhasTransformedMean = false;
+	this->ltransformedMean = 0;
 }
 
 
@@ -54,6 +56,17 @@ const ActorSet * DyadicCovariate::pSecondActorSet() const
 void DyadicCovariate::mean(double value)
 {
 	this->lmean = value;
+}
+
+
+/**
+ * Stores a transformed-scale mean supplied by the caller. Effects that do
+ * not request a nonlinear transformation ignore this value.
+ */
+void DyadicCovariate::transformedMean(double value)
+{
+	this->ltransformedMean = value;
+	this->lhasTransformedMean = true;
 }
 
 }

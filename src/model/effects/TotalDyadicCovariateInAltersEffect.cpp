@@ -83,6 +83,17 @@ void TotalDyadicCovariateInAltersEffect::initialize(const Data * pData,
     }
     else
     {
+		const bool hasFixedTransformedMean = this->lpConstantDyadicCovariate
+			? this->lpConstantDyadicCovariate->hasTransformedMean()
+			: this->lpChangingDyadicCovariate->hasTransformedMean();
+		if (hasFixedTransformedMean)
+		{
+			this->lTransformedDycoMean = this->lpConstantDyadicCovariate
+				? this->lpConstantDyadicCovariate->transformedMean()
+				: this->lpChangingDyadicCovariate->transformedMean();
+			return;
+		}
+
         const Network * pNet = this->pNetwork();
         int nActors = pNet->n();
         double sumT = 0;
